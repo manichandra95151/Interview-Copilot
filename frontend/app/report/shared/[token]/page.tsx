@@ -1,7 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { api } from "@/lib/api";
 
@@ -59,63 +58,26 @@ function ScoreBadge({ score }: { score: number | null | undefined }) {
   return <span className={`text-sm font-bold px-2.5 py-1 rounded-lg ${cls}`}>{score}/10</span>;
 }
 
-export default function ReportPage() {
-  const { id: sessionId } = useParams<{ id: string }>();
-  const { data: session, status } = useSession();
-  const token = (session as any)?._token;
+export default function SharedReportPage() {
+  const { token } = useParams<{ token: string }>();
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [sharing, setSharing] = useState(false);
-  const [sharedLink, setSharedLink] = useState("");
 
   useEffect(() => {
-    if (status === "unauthenticated") {
-      setError("Please sign in to view this report.");
-      setLoading(false);
-      return;
-    }
     if (!token) return;
-    api.getReport(sessionId, token)
+    api.getSharedReport(token)
       .then(setData)
       .catch(e => setError(e.message))
       .finally(() => setLoading(false));
-  }, [sessionId, token, status]);
-
-  const handleShare = async () => {
-    if (!token) return;
-    setSharing(true);
-    try {
-      let shareToken = data?.sessionMeta?.shareToken;
-      if (!shareToken) {
-        const res = await api.createShare(sessionId, token);
-        shareToken = res.shareToken;
-        // Update local state so shareToken is saved
-        setData((prev: any) => ({
-          ...prev,
-          sessionMeta: {
-            ...prev.sessionMeta,
-            shareToken,
-          }
-        }));
-      }
-      const link = window.location.origin + `/report/shared/${shareToken}`;
-      await navigator.clipboard.writeText(link);
-      setSharedLink(link);
-      setTimeout(() => setSharedLink(""), 3000);
-    } catch (e: any) {
-      alert("Failed to share report: " + e.message);
-    } finally {
-      setSharing(false);
-    }
-  };
+  }, [token]);
 
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="text-4xl mb-4 animate-pulse">📊</div>
-          <p className="text-gray-500 text-sm">Loading report...</p>
+          <p className="text-gray-500 text-sm">Loading shared report...</p>
         </div>
       </div>
     );
@@ -126,15 +88,13 @@ export default function ReportPage() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
         <div className="bg-white rounded-2xl border border-red-100 p-8 max-w-md text-center">
           <div className="text-4xl mb-4">⚠️</div>
-          <p className="text-red-600 text-sm mb-4">{error}</p>
-          <Link href="/dashboard" className="text-indigo-600 text-sm font-medium">← Back to dashboard</Link>
+          <p className="text-red-600 text-sm mb-4">This share link is invalid or has expired.</p>
         </div>
       </div>
     );
   }
 
   const { report, sessionMeta, questions, answers } = data;
-
   const getAnswer = (qId: number) => answers?.find((a: any) => a.question_id == qId);
 
   return (
@@ -142,30 +102,22 @@ export default function ReportPage() {
       {/* Nav */}
       <nav className="bg-white border-b border-gray-100 sticky top-0 z-10 print:hidden">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 flex items-center justify-between h-16">
-          <Link href="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center text-white text-sm font-bold">AI</div>
-            <span className="font-semibold text-gray-900">InterviewAI</span>
-          </Link>
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center text-white text-sm font-bold">C</div>
+            <span className="font-semibold text-gray-900">CopilotHire</span>
+          </div>
           <div className="flex items-center gap-3">
-            <button
-              onClick={handleShare}
-              className="text-sm text-white bg-[#6C47FF] hover:bg-[#5A3AE0] px-4 py-2 rounded-lg transition-colors flex items-center gap-1.5 font-medium shadow-sm"
-            >
-              {sharing ? "Generating..." : sharedLink ? "✓ Link Copied!" : "🔗 Share Report"}
-            </button>
             <button
               onClick={() => window.print()}
               className="text-sm text-gray-600 border border-gray-200 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors"
             >
               🖨️ Print
             </button>
-            <Link href="/dashboard" className="text-sm text-gray-500 hover:text-gray-900 transition-colors">← Dashboard</Link>
           </div>
         </div>
       </nav>
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8 space-y-6">
-
         {/* Header */}
         <div className="bg-white rounded-2xl border border-gray-100 p-6">
           <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-4">
@@ -248,12 +200,12 @@ export default function ReportPage() {
         )}
 
         {/* Next steps */}
-        <div className="bg-indigo-50 border border-indigo-100 rounded-2xl p-6">
-          <h2 className="text-sm font-semibold text-indigo-700 uppercase tracking-wider mb-3">Recommended Next Steps</h2>
+        <div className="bg-[#EDE9FF] border border-[#E8E4FF] rounded-2xl p-6">
+          <h2 className="text-sm font-semibold text-[#6C47FF] uppercase tracking-wider mb-3">Recommended Next Steps</h2>
           <ol className="space-y-2">
             {(report.nextSteps || []).map((s: string, i: number) => (
-              <li key={i} className="flex items-start gap-3 text-sm text-indigo-800">
-                <span className="bg-indigo-200 text-indigo-700 text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-0.5">{i + 1}</span>
+              <li key={i} className="flex items-start gap-3 text-sm text-[#4A2FE0]">
+                <span className="bg-[#EDE9FF] text-[#6C47FF] text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-0.5">{i + 1}</span>
                 {s}
               </li>
             ))}
@@ -275,10 +227,11 @@ export default function ReportPage() {
                   <div className="flex items-start justify-between gap-3 mb-2">
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="text-xs font-bold text-gray-400">Q{i + 1}</span>
-                      <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${q.category === "behavioral" ? "bg-blue-100 text-blue-700" :
+                      <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                        q.category === "behavioral" ? "bg-blue-100 text-blue-700" :
                         q.category === "situational" ? "bg-purple-100 text-purple-700" :
-                          "bg-orange-100 text-orange-700"
-                        }`}>{q.category}</span>
+                        "bg-orange-100 text-orange-700"
+                      }`}>{q.category}</span>
                     </div>
                     <ScoreBadge score={ans?.score} />
                   </div>
@@ -310,16 +263,6 @@ export default function ReportPage() {
               );
             })}
           </div>
-        </div>
-
-        {/* Actions */}
-        <div className="flex flex-col sm:flex-row gap-4 pb-8">
-          <Link href="/setup" className="flex-1 bg-indigo-600 text-white text-center py-3.5 rounded-xl font-semibold hover:bg-indigo-700 transition-colors">
-            Start another interview →
-          </Link>
-          <Link href="/dashboard" className="flex-1 bg-white text-gray-700 text-center py-3.5 rounded-xl font-semibold border border-gray-200 hover:bg-gray-50 transition-colors">
-            Back to dashboard
-          </Link>
         </div>
       </div>
     </div>

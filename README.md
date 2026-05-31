@@ -1,262 +1,115 @@
-# InterviewAI — AI-Powered Interview Copilot
+# CopilotHire — AI Interview Copilot
 
-A full-stack SaaS application that helps non-technical hiring managers run structured, AI-evaluated interviews. Upload a resume, get tailored questions, record answers live, and receive a detailed report.
+AI-powered interview assistant for non-technical hiring managers. Upload a resume, generate tailored questions, record answers live, and get a structured evaluation report.
 
----
+## Architecture
 
-## Tech Stack
-
-| Layer | Technology |
-|-------|-----------|
-| Frontend | Next.js 14 (App Router), TypeScript, Tailwind CSS |
-| Backend | Node.js, Express.js |
-| AI | OpenRouter → Gemini 2.5 Flash (questions/report) + Groq Llama 3.3 70B (live eval) |
-| Voice | Web Speech API (browser-native, free) |
-| Storage | In-memory (dev) · Supabase (production) |
-
----
-
-## Prerequisites
-
-- Node.js 18+
-- A free OpenRouter API key → https://openrouter.ai/keys
-
----
-
-## Setup & Run
-
-### 1. Clone / extract the project
-
-```bash
-cd interview-copilot
+```
+Next.js frontend (Vercel)   →   Express backend (Railway)   →   Supabase (PostgreSQL)
+                                                             →   OpenRouter (LLMs)
+Google OAuth (NextAuth)
 ```
 
-### 2. Set up the backend
+## New in this version
+
+- **Google OAuth** via NextAuth — managers sign in with Google, sessions are user-scoped
+- **Supabase database** — all sessions, questions, answers, and reports persist in PostgreSQL
+- **Clickable follow-up questions** — AI-suggested follow-ups can now be activated with one click, showing the follow-up as the active question in the interview panel
+
+---
+
+## Quick start
+
+### 1. Supabase setup
+
+1. Create a free project at [supabase.com](https://supabase.com)
+2. Go to **SQL Editor** and run the contents of `backend/src/db/schema.sql`
+3. Copy your **Project URL** and **service_role secret key** from Settings → API
+
+### 2. Google OAuth setup
+
+1. Go to [console.cloud.google.com](https://console.cloud.google.com)
+2. Create a project → Enable "Google+ API" → Create OAuth 2.0 credentials
+3. Add authorised redirect URI: `http://localhost:3000/api/auth/callback/google` (and your prod URL)
+4. Copy your Client ID and Client Secret
+
+### 3. Backend
 
 ```bash
 cd backend
-npm install
 cp .env.example .env
-```
-
-Edit `backend/.env` and add your OpenRouter API key:
-```
-OPENROUTER_API_KEY=sk-or-your-key-here
-```
-
-Start the backend:
-```bash
-npm run dev
-```
-
-Backend runs on → http://localhost:4000
-
-### 3. Set up the frontend
-
-Open a new terminal:
-```bash
-cd frontend
+# Fill in: OPENROUTER_API_KEY, SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, JWT_SECRET, FRONTEND_URL
 npm install
-```
-
-The `.env.local` file is already configured to point to `http://localhost:4000`.
-
-Start the frontend:
-```bash
 npm run dev
 ```
 
-Frontend runs on → http://localhost:3000
+### 4. Frontend
 
-### 4. Open the app
-
-Visit http://localhost:3000 in Chrome or Edge (required for voice recording).
-
----
-
-## How to Use
-
-1. **Homepage** → http://localhost:3000 — Marketing landing page
-2. **Setup** → Click "Start your first interview" or go to `/setup`
-   - Enter candidate name and role
-   - Upload resume (PDF/DOCX/TXT) — optional but improves questions
-   - Paste job description
-   - Click "Generate questions"
-3. **Live Interview** → `/interview/[id]`
-   - Questions appear one at a time
-   - Click **🎙 Record** and the candidate speaks
-   - Click **⏹ Stop** when done
-   - Click **Evaluate** — AI scores in ~1 second
-   - Follow-up suggestions appear on the right panel
-   - Click **Next question →** to proceed
-4. **Report** → `/report/[id]`
-   - Full evaluation with competency scores, verdict, red flags
-   - Print or share via browser print function
-5. **Dashboard** → `/dashboard` — All past sessions
-
----
-
-## Project Structure
-
-```
-interview-copilot/
-├── frontend/                    # Next.js application
-│   ├── app/
-│   │   ├── page.tsx             # Homepage (marketing)
-│   │   ├── dashboard/page.tsx   # Session list
-│   │   ├── setup/page.tsx       # Create interview
-│   │   ├── interview/[id]/      # Live interview
-│   │   └── report/[id]/         # Post-interview report
-│   └── lib/api.ts               # Backend API client
-│
-└── backend/                     # Express API
-    └── src/
-        ├── index.js             # Entry point
-        ├── routes/              # API routes
-        │   ├── session.js       # Session management
-        │   ├── questions.js     # Question generation
-        │   ├── answers.js       # Answer evaluation
-        │   └── report.js        # Report generation
-        └── services/
-            ├── llm.js           # OpenRouter (Gemini + Groq)
-            ├── parser.js        # PDF/DOCX text extraction
-            └── store.js         # In-memory session store
-```
-
----
-
-## API Endpoints
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/api/session/create` | Create session + parse resume |
-| GET | `/api/session` | List all sessions |
-| GET | `/api/session/:id` | Get session details |
-| DELETE | `/api/session/:id` | Delete session |
-| POST | `/api/questions/generate` | Generate questions (Gemini) |
-| GET | `/api/questions/:sessionId` | Get questions |
-| POST | `/api/answers/evaluate` | Evaluate answer (Groq) |
-| POST | `/api/answers/skip` | Skip a question |
-| POST | `/api/report/generate` | Generate full report (Gemini) |
-| GET | `/api/report/:sessionId` | Get report |
-| GET | `/api/health` | Health check |
-
----
-
-## Environment Variables
-
-### backend/.env
-```
-OPENROUTER_API_KEY=sk-or-...     # Required — get at openrouter.ai/keys
-PORT=4000
-FRONTEND_URL=http://localhost:3000
-```
-
-### frontend/.env.local
-```
-NEXT_PUBLIC_API_URL=http://localhost:4000
-```
-
----
-
-## Free Tier Limits
-
-| Service | Free Limit | Your Usage Per Interview |
-|---------|-----------|--------------------------|
-| OpenRouter | 200 req/day | ~13 requests |
-| Gemini 2.5 Flash | 1,500 req/day | ~3 requests |
-| Groq Llama 3.3 70B | Unlimited via OpenRouter | ~10 requests |
-| Web Speech API | Free (browser) | Unlimited |
-
-You get approximately **15 free interviews per day** on the free tier.
-
----
-
-## Voice Recording Note
-
-Voice recording uses the **Web Speech API** which is:
-- ✅ Supported: Chrome, Edge, Safari (desktop)
-- ❌ Not supported: Firefox
-
-For production, replace with Deepgram or AssemblyAI for better accuracy and wider browser support.
-
----
-
-## Production Deployment
-
-### Frontend → Vercel
 ```bash
 cd frontend
-vercel deploy
+cp .env.example .env
+# Fill in: NEXT_PUBLIC_API_URL, NEXTAUTH_SECRET, NEXTAUTH_URL, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, JWT_SECRET
+# JWT_SECRET must match the backend .env JWT_SECRET exactly
+npm install
+npm run dev
 ```
 
-### Backend → Railway
-```bash
-cd backend
-railway up
-```
-
-Update `FRONTEND_URL` in backend `.env` and `NEXT_PUBLIC_API_URL` in frontend `.env.local` with production URLs.
-
-### Persistent Storage → Supabase
-
-For production, replace the in-memory store (`backend/src/services/store.js`) with Supabase calls. Database schema:
-
-```sql
-CREATE TABLE sessions (
-  id UUID PRIMARY KEY,
-  candidate_name TEXT NOT NULL,
-  role TEXT NOT NULL,
-  seniority TEXT,
-  jd_text TEXT,
-  resume_text TEXT,
-  extra_context TEXT,
-  status TEXT DEFAULT 'setup',
-  created_at TIMESTAMPTZ DEFAULT now()
-);
-
-CREATE TABLE questions (
-  id SERIAL PRIMARY KEY,
-  session_id UUID REFERENCES sessions(id) ON DELETE CASCADE,
-  position INT,
-  question TEXT NOT NULL,
-  category TEXT,
-  rubric TEXT,
-  time_guide TEXT
-);
-
-CREATE TABLE answers (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  session_id UUID REFERENCES sessions(id) ON DELETE CASCADE,
-  question_id INT,
-  transcript TEXT,
-  score INT,
-  strength TEXT,
-  gap TEXT,
-  follow_up TEXT,
-  sentiment TEXT,
-  skipped BOOLEAN DEFAULT false,
-  manual_notes TEXT,
-  answered_at TIMESTAMPTZ DEFAULT now()
-);
-
-CREATE TABLE reports (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  session_id UUID REFERENCES sessions(id) ON DELETE CASCADE UNIQUE,
-  overall_score NUMERIC(3,1),
-  verdict TEXT,
-  summary TEXT,
-  strengths JSONB,
-  gaps JSONB,
-  red_flags JSONB,
-  next_steps JSONB,
-  competencies JSONB,
-  created_at TIMESTAMPTZ DEFAULT now()
-);
-```
+Open [http://localhost:3000](http://localhost:3000) — click **Sign in** and authenticate with Google.
 
 ---
 
-## License
+## How it works
 
-MIT — build freely, ship confidently.
+1. **Sign in** with Google
+2. **Setup** — upload candidate resume (PDF/DOCX/TXT), enter job description and role context
+3. **Generate questions** — AI creates 10 tailored questions with rubrics
+4. **Live interview** — ask each question, press Record, candidate speaks, AI evaluates in real-time
+5. **Follow-up** — if AI suggests a follow-up, click "Ask this follow-up →" to use it as the active question
+6. **Report** — structured verdict, competency scores, strengths, gaps, red flags, and next steps
+
+---
+
+## Environment variables
+
+### Backend `.env`
+| Variable | Description |
+|---|---|
+| `OPENROUTER_API_KEY` | Your OpenRouter key |
+| `SUPABASE_URL` | Supabase project URL |
+| `SUPABASE_SERVICE_ROLE_KEY` | Supabase service role key |
+| `JWT_SECRET` | Secret for signing JWTs (share with frontend) |
+| `PORT` | API port (default 4000) |
+| `FRONTEND_URL` | Frontend URL for CORS |
+
+### Frontend `.env`
+| Variable | Description |
+|---|---|
+| `NEXT_PUBLIC_API_URL` | Backend API URL |
+| `NEXTAUTH_SECRET` | Random secret for NextAuth (generate with `openssl rand -base64 32`) |
+| `NEXTAUTH_URL` | Frontend URL |
+| `GOOGLE_CLIENT_ID` | Google OAuth client ID |
+| `GOOGLE_CLIENT_SECRET` | Google OAuth client secret |
+| `JWT_SECRET` | Same as backend JWT_SECRET |
+
+---
+
+## Supabase schema (summary)
+
+- `sessions` — interview sessions (linked to user by `user_id`)
+- `questions` — questions per session
+- `answers` — evaluated answers (score, strength, gap, follow_up, sentiment)
+- `reports` — final reports (overall_score, verdict, competencies, etc.)
+
+Row-level security is enabled; the backend uses the service role key which bypasses RLS.
+
+---
+
+## Deployment
+
+**Backend → Railway**
+- Set all env vars in Railway dashboard
+- Deploy as Node.js service
+
+**Frontend → Vercel**
+- Set all env vars in Vercel dashboard
+- Add production callback URL to Google OAuth console: `https://your-domain.vercel.app/api/auth/callback/google`

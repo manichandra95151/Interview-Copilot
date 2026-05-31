@@ -1,24 +1,24 @@
 @import "tailwindcss";
 
 :root {
-  --brand: #4F46E5;
-  --brand-light: #EEF2FF;
-  --brand-dark: #3730A3;
+  --brand: #6C47FF;
+  --brand-mid: #8B6FFF;
+  --brand-light: #EDE9FF;
+  --brand-dark: #4A2FE0;
+  --surface: #FFFFFF;
+  --surface-2: #F8F7FF;
+  --border: #E8E4FF;
 }
 
-* {
-  box-sizing: border-box;
-}
 
 body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  -webkit-font-smoothing: antialiased;
+  font-family: 'Inter', -apple-system, system-ui, sans-serif;
 }
 
-/* Custom scrollbar */
+/* Scrollbar */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
 
 ::-webkit-scrollbar-track {
@@ -26,59 +26,22 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #d1d5db;
+  background: #d1c8ff;
   border-radius: 3px;
 }
 
-::-webkit-scrollbar-thumb:hover {
-  background: #9ca3af;
-}
-
-/* Smooth focus ring */
+/* Focus */
 *:focus-visible {
-  outline: 2px solid #4F46E5;
+  outline: 2px solid var(--brand);
   outline-offset: 2px;
-  border-radius: 4px;
+  border-radius: 6px;
 }
 
-/* Recording pulse animation */
-@keyframes pulse-ring {
-  0% {
-    transform: scale(1);
-    opacity: 1;
-  }
-
-  100% {
-    transform: scale(1.6);
-    opacity: 0;
-  }
-}
-
-.recording-pulse::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: 50%;
-  background: rgba(239, 68, 68, 0.4);
-  animation: pulse-ring 1.2s ease-out infinite;
-}
-
-/* Score bar fill animation */
-@keyframes fill-bar {
-  from {
-    width: 0;
-  }
-}
-
-.score-bar-fill {
-  animation: fill-bar 0.8s ease-out forwards;
-}
-
-/* Fade in up */
+/* Animations */
 @keyframes fade-up {
   from {
     opacity: 0;
-    transform: translateY(12px);
+    transform: translateY(10px);
   }
 
   to {
@@ -87,29 +50,146 @@ body {
   }
 }
 
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes pulse-rec {
+
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.6;
+    transform: scale(1.15);
+  }
+}
+
+@keyframes fill-bar {
+  from {
+    width: 0;
+  }
+}
+
+@keyframes slide-right {
+  from {
+    transform: translateX(-100%);
+  }
+}
+
+@keyframes float {
+
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
 .fade-up {
-  animation: fade-up 0.4s ease forwards;
+  animation: fade-up 0.35s ease forwards;
+}
+
+.fade-in {
+  animation: fade-in 0.25s ease forwards;
+}
+
+.float {
+  animation: float 4s ease-in-out infinite;
+}
+
+.fill-bar {
+  animation: fill-bar 0.9s cubic-bezier(.4, 0, .2, 1) forwards;
+}
+
+.rec-pulse {
+  animation: pulse-rec 1.2s ease-in-out infinite;
+}
+
+/* Glass card */
+.glass {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(108, 71, 255, 0.12);
+}
+
+/* Gradient hero bg */
+.hero-bg {
+  background:
+    radial-gradient(ellipse 900px 600px at 10% 40%, rgba(108, 71, 255, 0.07) 0%, transparent 70%),
+    radial-gradient(ellipse 700px 500px at 90% 10%, rgba(139, 111, 255, 0.05) 0%, transparent 70%),
+    #F8F7FF;
+}
+
+/* Brand gradient */
+.brand-gradient {
+  background: linear-gradient(135deg, #6C47FF 0%, #A855F7 60%, #EC4899 100%);
 }
 
 /* Gradient text */
 .gradient-text {
-  background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 50%, #DB2777 100%);
+  background: linear-gradient(135deg, #6C47FF 0%, #A855F7 55%, #EC4899 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
-/* Hero gradient bg */
-.hero-bg {
-  background: radial-gradient(ellipse at 20% 50%, rgba(79, 70, 229, 0.06) 0%, transparent 60%), radial-gradient(ellipse at 80% 20%, rgba(124, 58, 237, 0.05) 0%, transparent 60%), #fafafa;
+/* Score pill colors */
+.score-great {
+  background: #DCFCE7;
+  color: #15803D;
 }
 
-/* Card hover */
-.card-hover {
+.score-good {
+  background: #FEF9C3;
+  color: #854D0E;
+}
+
+.score-weak {
+  background: #FEE2E2;
+  color: #B91C1C;
+}
+
+/* Card lift */
+.card-lift {
   transition: box-shadow 0.2s, transform 0.2s;
 }
 
-.card-hover:hover {
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+.card-lift:hover {
+  box-shadow: 0 12px 40px rgba(108, 71, 255, 0.12);
   transform: translateY(-2px);
+}
+
+/* Chart bar */
+.chart-bar {
+  transition: height 0.8s cubic-bezier(.4, 0, .2, 1);
+}
+
+/* Print styles */
+@media print {
+
+  nav,
+  .no-print {
+    display: none !important;
+  }
+
+  body {
+    background: white;
+  }
+
+  .print-break {
+    page-break-before: always;
+  }
 }

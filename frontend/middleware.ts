@@ -2,7 +2,7 @@ import { withAuth } from "next-auth/middleware";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-export default function middleware(req: NextRequest, event: any) {
+export default function middleware(req: any, event: any) {
   const isAuthEnabled = process.env.isAuth === 'true' || process.env.IS_AUTH === 'true';
   if (!isAuthEnabled) {
     return NextResponse.next();

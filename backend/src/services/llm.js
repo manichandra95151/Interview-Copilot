@@ -1,8 +1,8 @@
 const OPENROUTER_BASE = 'https://openrouter.ai/api/v1';
 
 export const MODELS = {
-  gemini: 'google/gemini-2.5-flash',
-  groq:   'google/gemini-2.5-flash', // fallback to same model, swap for groq when available
+  gemini: 'google/gemma-2-9b-it:free',
+  groq:   'google/gemma-2-9b-it:free',
 };
 
 export async function callLLM(model, messages, maxTokens = 1000) {
@@ -134,7 +134,7 @@ Candidate Resume:
 ${resumeText || 'No resume provided — generate questions based on the role and JD only.'}`,
       },
     ],
-    1600
+    2000
   );
 
   return JSON.parse(cleanJSON(content));
@@ -314,7 +314,7 @@ Interview Q&A:
 ${qaBlock}`,
       },
     ],
-    1600
+    2000
   );
 
   return JSON.parse(cleanJSON(content));

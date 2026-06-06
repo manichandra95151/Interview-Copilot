@@ -1,40 +1,77 @@
+import { GoogleGenAI } from "@google/genai";
+import Groq from "groq-sdk";
+
 const OPENROUTER_BASE = 'https://openrouter.ai/api/v1';
 
 export const MODELS = {
-  gemini: 'google/gemma-2-9b-it:free',
-  groq:   'google/gemma-2-9b-it:free',
+  gemini: "gemini",
+  groq: "groq",
 };
 
-export async function callLLM(model, messages, maxTokens = 1000) {
-  const apiKey = process.env.OPENROUTER_API_KEY;
-  if (!apiKey) throw new Error('OPENROUTER_API_KEY not set in environment');
 
-  const res = await fetch(`${OPENROUTER_BASE}/chat/completions`, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      'Content-Type': 'application/json',
-      'HTTP-Referer': process.env.FRONTEND_URL || 'http://localhost:3000',
-      'X-Title': 'CopilotHire',
-    },
-    body: JSON.stringify({
-      model,
-      messages,
-      max_tokens: maxTokens,
-      response_format: { type: 'json_object' },
-    }),
-  });
 
-  if (!res.ok) {
-    const err = await res.text();
-    throw new Error(`OpenRouter error ${res.status}: ${err}`);
+const gemini = new GoogleGenAI({
+  apiKey: process.env.GEMINI_API_KEY,
+});
+
+const groq = new Groq({
+  apiKey: process.env.GROQ_API_KEY,
+});
+
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+export async function callLLM(provider, messages, maxTokens = 1000) {
+  try {
+    console.log("[LLM] Trying Gemini 2.5 Flash");
+
+    const prompt = messages
+      .map((m) => `${m.role.toUpperCase()}:\n${m.content}`)
+      .join("\n\n");
+
+    const result = await gemini.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: prompt,
+    });
+
+    const text = result.text;
+
+    if (!text) {
+      throw new Error("Gemini returned empty response");
+    }
+
+    console.log("[LLM] Gemini success");
+
+    return text;
+  } catch (err) {
+    console.warn(
+      "[LLM] Gemini failed. Falling back to Groq."
+    );
+
+    console.error(err.message);
+
+    await sleep(1000);
+
+    const completion =
+      await groq.chat.completions.create({
+        model: "llama-3.3-70b-versatile",
+        messages,
+        max_tokens: maxTokens,
+        temperature: 0.3,
+      });
+
+    const content =
+      completion?.choices?.[0]?.message?.content;
+
+    if (!content) {
+      throw new Error(
+        "Groq returned empty response"
+      );
+    }
+
+    console.log("[LLM] Groq success");
+
+    return content;
   }
-
-  const data = await res.json();
-  if (!data.choices?.[0]?.message?.content) {
-    throw new Error('Invalid LLM response: ' + JSON.stringify(data));
-  }
-  return data.choices[0].message.content;
 }
 
 function cleanJSON(raw) {

@@ -53,10 +53,10 @@ export default async function HomePage() {
           <div className="flex items-center gap-3">
             {session ? (
               <>
-                <div className="hidden sm:flex items-center gap-2">
+                {/* <div className="hidden sm:flex items-center gap-2">
                   <img src={session.user?.image || ''} className="w-7 h-7 rounded-full" alt="" />
                   <span className="text-sm text-gray-600">{session.user?.name?.split(' ')[0]}</span>
-                </div>
+                </div> */}
                 <Link href="/dashboard" className="bg-[#6C47FF] text-white text-sm px-4 py-2 rounded-xl hover:bg-[#5A3AE0] transition font-medium shadow-lg shadow-purple-200">
                   Dashboard →
                 </Link>

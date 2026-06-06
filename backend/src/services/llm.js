@@ -97,7 +97,7 @@ QUALITY RULES — every question must:
 2. Be directly relevant to the role and JD provided
 3. Surface skills or behaviours that predict success in this specific role
 4. Be phrased professionally but conversationally
-5. Have a rubric that describes what EXCELLENT, AVERAGE, and POOR answers look like
+5. Have a short, highly concise rubric (max 15 words) listing 2-3 key criteria.
 6. NOT be generic or clichéd (avoid "Where do you see yourself in 5 years?", "What's your greatest weakness?")
 7. Be calibrated to the seniority level — senior roles demand strategic thinking, junior roles probe fundamentals
 
@@ -113,7 +113,7 @@ Return ONLY valid JSON. Schema:
       "id": 1,
       "question": "The actual question text",
       "category": "behavioral",
-      "rubric": "EXCELLENT: candidate gives specific example with clear impact metrics, demonstrates ownership, shows reflection. AVERAGE: gives example but vague on outcome or their specific role. POOR: speaks generally, no concrete example, deflects responsibility.",
+      "rubric": "Look for specific STAR metrics, ownership, and reflection on outcomes.",
       "timeGuide": "2-3 minutes",
       "probeHints": ["Follow up: what was the specific outcome?", "Ask: what would you do differently?"]
     }
@@ -134,7 +134,7 @@ Candidate Resume:
 ${resumeText || 'No resume provided — generate questions based on the role and JD only.'}`,
       },
     ],
-    1200
+    1600
   );
 
   return JSON.parse(cleanJSON(content));
@@ -314,7 +314,7 @@ Interview Q&A:
 ${qaBlock}`,
       },
     ],
-    1200
+    1600
   );
 
   return JSON.parse(cleanJSON(content));

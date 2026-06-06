@@ -134,7 +134,7 @@ Candidate Resume:
 ${resumeText || 'No resume provided — generate questions based on the role and JD only.'}`,
       },
     ],
-    3000
+    1200
   );
 
   return JSON.parse(cleanJSON(content));
@@ -314,7 +314,7 @@ Interview Q&A:
 ${qaBlock}`,
       },
     ],
-    2000
+    1200
   );
 
   return JSON.parse(cleanJSON(content));

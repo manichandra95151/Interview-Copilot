@@ -56,15 +56,6 @@ export default function DashboardPage() {
             <Link href="/setup" className="bg-[#6C47FF] text-white text-sm px-4 py-2 rounded-xl hover:bg-[#5A3AE0] transition font-medium shadow-lg shadow-purple-200">
               + New Interview
             </Link>
-            {session?.user && (
-              <div className="flex items-center gap-2 pl-3 border-l border-gray-100">
-                <img src={session.user.image || ''} className="w-8 h-8 rounded-full border-2 border-purple-100" alt="" />
-                <div className="hidden sm:block">
-                  <p className="text-xs font-medium text-gray-900 leading-none">{session.user.name?.split(' ')[0]}</p>
-                  <button onClick={() => signOut({ callbackUrl: '/' })} className="text-xs text-gray-400 hover:text-gray-600 transition mt-0.5">Sign out</button>
-                </div>
-              </div>
-            )}
           </div>
         </div>
       </nav>

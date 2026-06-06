@@ -3,72 +3,74 @@ import Link from "next/link";
 import { useSession } from "next-auth/react";
 
 const features = [
-  { 
-    icon: "⚡", 
-    title: "Instant Calibration", 
-    desc: "Simply drop a resume and job description. Within seconds, our AI calibrates the role seniority and drafts 10 high-impact, rubric-aligned interview questions." 
+  {
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-6 h-6">
+        <path d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75" strokeLinecap="round"/>
+      </svg>
+    ),
+    title: "Workspace Configuration",
+    desc: "Upload resumes and job parameters. Our AI generates 10 structured rubrics and tailored questions mapped to specific competencies like Behavioral and Technical skills.",
   },
-  { 
-    icon: "🎙️", 
-    title: "Active Transcript Scoring", 
-    desc: "Record the conversation directly in-app. The platform transcribes responses live and scores them 1-10 against candidate-specific rubrics with real-time feedback." 
+  {
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-6 h-6">
+        <path d="M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 116 0v8.25a3 3 0 01-3 3z" strokeLinecap="round" strokeLinejoin="round"/>
+      </svg>
+    ),
+    title: "Live Interview Copilot",
+    desc: "Record sessions directly. Get real-time feedback analysis, calibrated verdicts, and follow-up recommendations based on live candidate transcripts.",
   },
-  { 
-    icon: "📊", 
-    title: "Insight Analytics", 
-    desc: "Generate comprehensive candidate profiles with competency radars, strengths, performance gaps, and evidence-backed hiring verdicts." 
-  },
-  { 
-    icon: "🔗", 
-    title: "Instant Panel Sharing", 
-    desc: "Generate secure, shareable public links in a single click. Keep your hiring panel, stakeholders, and HR teams aligned before the debrief." 
-  },
-  { 
-    icon: "🎯", 
-    title: "Multi-category Filtering", 
-    desc: "Target the competencies that matter most. Easily select and test behavioral, situational, domain experience, functional, culture fit, or leadership." 
-  },
-  { 
-    icon: "🧠", 
-    title: "Bypassed Question Detection", 
-    desc: "Unanswered or skipped questions are automatically flagged and analyzed, ensuring crucial performance details never slip by unnoticed." 
+  {
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-6 h-6">
+        <path d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" strokeLinecap="round"/>
+      </svg>
+    ),
+    title: "Calibrated Verdicts",
+    desc: "Receive objective scores and detailed feedback analysis highlighting key strengths and performance gaps for every candidate response.",
   },
 ];
 
 const steps = [
-  { n: "01", title: "Input Criteria", desc: "Upload the candidate's resume and paste the job description to define the role parameters." },
-  { n: "02", title: "Review Calibration", desc: "The platform generates 10 tailored questions mapped to specific candidate-fit rubrics." },
-  { n: "03", title: "Conduct Live Session", desc: "Present questions one by one, record live responses, and view instant score evaluations." },
-  { n: "04", title: "Share Assessment", desc: "Instantly publish and share the final structured evaluation report with the hiring team." },
+  { n: "01", title: "Input Criteria",       desc: "Upload candidate's resume and paste the job description to define role parameters." },
+  { n: "02", title: "Review Calibration",   desc: "The platform generates 10 tailored questions mapped to specific candidate rubrics." },
+  { n: "03", title: "Conduct Live Session", desc: "Present questions one by one, record responses, and view real-time scores." },
+  { n: "04", title: "Share Assessment",     desc: "Publish and share the final structured evaluation report with the hiring team." },
 ];
 
 export default function HomePage() {
   const { data: session } = useSession();
 
   return (
-    <div className="min-h-screen bg-[#F8F7FF] selection:bg-[#6C47FF]/20 selection:text-[#6C47FF]">
-      {/* Premium Header */}
-      <nav className="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-xl border-b border-[#EDE9FF]/80">
-        <div className="max-w-6xl mx-auto px-5 flex items-center justify-between h-16">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl brand-gradient flex items-center justify-center text-white font-bold text-sm shadow-md shadow-purple-100">C</div>
-            <span className="font-bold text-gray-900 tracking-tight text-lg">CopilotHire</span>
+    <div className="min-h-screen bg-[#F1F5F9] font-[Inter,system-ui,sans-serif]">
+
+      {/* ── NAV ── */}
+      <nav className="fixed top-0 w-full z-50 bg-white border-b border-[#E2E8F0]">
+        <div className="max-w-6xl mx-auto px-6 flex items-center justify-between h-14">
+          <div className="flex items-center gap-2.5">
+            <div className="w-7 h-7 rounded-lg bg-[#1D4ED8] flex items-center justify-center">
+              <svg viewBox="0 0 16 16" fill="none" className="w-4 h-4">
+                <circle cx="8" cy="8" r="6" stroke="white" strokeWidth="1.5"/>
+                <path d="M5 8h6M8 5v6" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
+              </svg>
+            </div>
+            <span className="font-bold text-[#0F172A] text-[15px] tracking-tight">CopilotHire</span>
           </div>
-          <div className="hidden md:flex items-center gap-8 text-sm font-medium text-gray-500">
-            <a href="#features" className="hover:text-gray-900 transition-colors">Platform Features</a>
-            <a href="#how-it-works" className="hover:text-gray-900 transition-colors">Methodology</a>
-            <a href="#v2-spotlight" className="hover:text-gray-900 transition-colors">V2 Roadmap</a>
+          <div className="hidden md:flex items-center gap-8 text-[13px] font-medium text-[#475569]">
+            <a href="#features" className="hover:text-[#0F172A] transition-colors">Features</a>
+            <a href="#how-it-works" className="hover:text-[#0F172A] transition-colors">About</a>
           </div>
           <div className="flex items-center gap-3">
             {session ? (
-              <Link href="/dashboard" className="bg-[#6C47FF] text-white text-sm px-4.5 py-2.5 rounded-xl hover:bg-[#5A3AE0] transition duration-200 font-semibold shadow-lg shadow-purple-200/50">
-                Go to Dashboard
+              <Link href="/dashboard" className="text-sm font-semibold text-[#1D4ED8] hover:text-[#1E40AF] transition">
+                Dashboard →
               </Link>
             ) : (
               <>
-                <Link href="/api/auth/signin" className="text-sm font-semibold text-gray-600 hover:text-gray-900 transition mr-2">Sign in</Link>
-                <Link href="/api/auth/signin" className="bg-[#6C47FF] text-white text-sm px-4.5 py-2.5 rounded-xl hover:bg-[#5A3AE0] transition duration-200 font-semibold shadow-lg shadow-purple-200/50">
-                  Start Free
+                <Link href="/api/auth/signin" className="text-sm font-medium text-[#475569] hover:text-[#0F172A] transition">Sign in</Link>
+                <Link href="/api/auth/signin" className="bg-[#1D4ED8] text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-[#1E40AF] transition">
+                  Get started
                 </Link>
               </>
             )}
@@ -76,91 +78,87 @@ export default function HomePage() {
         </div>
       </nav>
 
-      {/* Hero Section */}
-      <section className="hero-bg pt-36 pb-24 px-5 relative overflow-hidden">
-        <div className="max-w-5xl mx-auto text-center relative z-10">
-          <div className="inline-flex items-center gap-2 bg-[#EDE9FF] text-[#6C47FF] text-xs font-semibold px-4 py-1.5 rounded-full mb-8 tracking-wide uppercase shadow-sm">
-            <span className="w-1.5 h-1.5 bg-[#6C47FF] rounded-full animate-pulse"></span>
+      {/* ── HERO ── */}
+      <section className="pt-28 pb-20 px-6 bg-[#F8FAFC]">
+        <div className="max-w-4xl mx-auto text-center">
+          <div className="hero-badge mb-6 anim-fade-up">
+            <span className="w-1.5 h-1.5 bg-[#1D4ED8] rounded-full dot-blink"/>
             Professional Interview Intelligence
           </div>
-          <h1 className="text-5xl sm:text-7xl font-extrabold text-gray-900 leading-[1.1] mb-6 tracking-tight">
-            Structure your interviews.<br />
-            <span className="gradient-text">Calibrate your hires.</span>
+
+          <h1 className="text-5xl sm:text-6xl font-extrabold text-[#0F172A] leading-[1.1] tracking-tight mb-5 anim-fade-up-1">
+            Configure your workspace.<br/>
+            <span className="text-[#1D4ED8]">Master the live interview.</span>
           </h1>
-          <p className="text-lg sm:text-xl text-gray-500 max-w-3xl mx-auto mb-10 leading-relaxed">
-            The intelligent candidate evaluation copilot designed for modern teams. Calibrate seniority, generate custom rubrics, transcribe answers live, and deliver objective feedback in minutes.
+
+          <p className="text-[17px] text-[#475569] max-w-2xl mx-auto leading-relaxed mb-8 anim-fade-up-2">
+            Provide role context, candidate resumes, and configure target evaluation criteria. Then, conduct live sessions with real-time AI scoring and behavioral analysis.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+
+          <div className="flex flex-col sm:flex-row gap-3 justify-center items-center anim-fade-up-3">
             <Link href={session ? "/setup" : "/api/auth/signin"}
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-[#6C47FF] text-white px-8 py-4 rounded-2xl text-base font-bold hover:bg-[#5A3AE0] hover:scale-[1.02] active:scale-[0.98] transition duration-200 shadow-xl shadow-purple-200">
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-[#1D4ED8] hover:bg-[#1E40AF] text-white px-7 py-3.5 rounded-lg text-[15px] font-semibold transition-all active:scale-[0.98]">
               Start Free Session →
             </Link>
-            {!session && (
-              <Link href="/api/auth/signin"
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-white text-gray-700 px-8 py-4 rounded-2xl text-base font-bold border border-[#EDE9FF] hover:bg-gray-50 hover:scale-[1.02] active:scale-[0.98] transition duration-200">
-                Continue with Google
-              </Link>
-            )}
+            <Link href="/api/auth/signin"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-white text-[#0F172A] px-7 py-3.5 rounded-lg text-[15px] font-semibold border border-[#E2E8F0] hover:bg-[#F8FAFC] transition-all">
+              Watch Demo
+            </Link>
           </div>
         </div>
 
-        {/* Floating Mockup Preview */}
-        <div className="max-w-5xl mx-auto mt-20 relative z-10 group">
-          <div className="absolute -inset-1 rounded-3xl bg-gradient-to-r from-purple-500 to-pink-500 opacity-20 blur-xl group-hover:opacity-30 transition duration-1000"></div>
-          <div className="relative bg-white rounded-2xl shadow-2xl border border-[#EDE9FF] overflow-hidden">
-            <div className="bg-gray-50 border-b border-gray-100 px-5 py-3 flex items-center gap-2">
-              <div className="flex gap-1.5"><div className="w-3 h-3 rounded-full bg-red-400"/><div className="w-3 h-3 rounded-full bg-yellow-400"/><div className="w-3 h-3 rounded-full bg-green-400"/></div>
-              <span className="mx-auto text-xs text-gray-400 font-mono">CopilotHire — Candidate Assessment Center</span>
+        {/* Mockup preview */}
+        <div className="max-w-4xl mx-auto mt-14 anim-fade-up-4 anim-float">
+          <div className="bg-white rounded-2xl border border-[#E2E8F0] shadow-[0_8px_40px_rgba(15,23,42,0.10)] overflow-hidden">
+            {/* Window chrome */}
+            <div className="bg-[#F8FAFC] border-b border-[#E2E8F0] px-4 py-3 flex items-center gap-2">
+              <div className="flex gap-1.5">
+                <div className="w-3 h-3 rounded-full bg-[#FC635D]"/>
+                <div className="w-3 h-3 rounded-full bg-[#FDBC40]"/>
+                <div className="w-3 h-3 rounded-full bg-[#35CD4B]"/>
+              </div>
+              <span className="mx-auto text-[11px] text-[#94A3B8] font-mono">CopilotHire — Candidate Assessment Center</span>
             </div>
-            <div className="p-6 grid grid-cols-1 md:grid-cols-5 gap-6">
-              {/* Question list sidebar */}
-              <div className="md:col-span-1 space-y-2">
-                {[{n:1,s:'done',score:9},{n:2,s:'done',score:7},{n:3,s:'active'},{n:4,s:'pending'},{n:5,s:'pending'}].map(q => (
-                  <div key={q.n} className={`flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold ${q.s==='active' ? 'bg-[#EDE9FF] text-[#6C47FF]' : 'hover:bg-gray-50 text-gray-500'}`}>
-                    <div className={`w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold ${
-                      q.s==='done' && (q.score||0)>=8 ? 'bg-green-100 text-green-700' :
-                      q.s==='done' ? 'bg-amber-100 text-amber-700' :
-                      q.s==='active' ? 'bg-[#6C47FF] text-white' : 'bg-gray-100 text-gray-400'
-                    }`}>{q.s==='done'?(q.score||'✓'):q.n}</div>
-                    <div className="flex-1 font-medium">Question {q.n}</div>
+            {/* Mock content */}
+            <div className="grid grid-cols-12 divide-x divide-[#F1F5F9]">
+              {/* Sidebar */}
+              <div className="col-span-3 p-3 space-y-1.5">
+                {["Question 3", "Question 4", "Question 5"].map((q, i) => (
+                  <div key={i} className={`px-3 py-2 rounded-lg text-xs font-medium flex items-center gap-2 ${i===0?"bg-[#EFF6FF] text-[#1D4ED8]":"text-[#94A3B8]"}`}>
+                    {i===0 && <span className="w-1.5 h-1.5 bg-[#1D4ED8] rounded-full"/>}
+                    {q}
                   </div>
                 ))}
               </div>
-              {/* Live transcript area */}
-              <div className="md:col-span-2 space-y-4">
-                <div className="bg-[#F8F7FF] rounded-xl p-4 border border-[#EDE9FF]">
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="text-[10px] bg-[#EDE9FF] text-[#6C47FF] font-bold px-2 py-0.5 rounded-full">Q3 · Behavioral</span>
-                  </div>
-                  <p className="text-xs font-bold text-gray-900 leading-relaxed">Tell me about a time you had to manage a project through unexpected scope changes. How did you keep stakeholders aligned?</p>
-                </div>
-                <div className="bg-red-50/50 border border-red-100/50 rounded-xl p-4">
+              {/* Center */}
+              <div className="col-span-5 p-4">
+                <span className="text-[10px] font-bold text-[#1D4ED8] bg-[#EFF6FF] px-2 py-0.5 rounded-full uppercase tracking-wide">Behavioral</span>
+                <p className="text-sm font-bold text-[#0F172A] mt-2.5 leading-snug">Tell me about a time you had to manage a project through unexpected scope changes.</p>
+                <div className="mt-3 bg-[#FEF2F2] border border-[#FECACA]/50 rounded-lg p-3">
                   <div className="flex items-center gap-1.5 mb-1.5">
-                    <span className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse"/>
-                    <span className="text-[10px] text-red-500 font-bold uppercase tracking-wider">Live Transcription</span>
+                    <span className="w-1.5 h-1.5 bg-red-500 rounded-full dot-blink"/>
+                    <span className="text-[10px] font-bold text-red-500 uppercase tracking-wider">Live Transcription</span>
                   </div>
-                  <p className="text-xs text-gray-600 leading-relaxed italic">"We had a major infrastructure change mid-project. I immediately set up a stakeholder alignment session, documented the scope changes, and calibrated expectations..."</p>
+                  <p className="text-xs text-[#475569] italic leading-relaxed">"We had a major infrastructure change mid-project. I immediately set up a stakeholder alignment session, documented the scope changes, and calibrated expectations..."</p>
                 </div>
               </div>
-              {/* AI scoring card */}
-              <div className="md:col-span-2 space-y-4">
-                <div className="bg-white border border-[#EDE9FF] rounded-xl p-4 shadow-sm">
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="text-xs font-bold text-gray-500 uppercase">AI Verification</span>
-                    <span className="text-sm font-extrabold text-green-700 bg-green-50 px-2.5 py-0.5 rounded-lg">8 / 10</span>
+              {/* Right panel */}
+              <div className="col-span-4 p-4">
+                <div className="bg-[#EFF6FF] rounded-xl p-3 mb-3">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-[11px] font-bold text-[#1D4ED8]">AI Verification</span>
+                    <span className="text-sm font-black text-[#1D4ED8]">8/10</span>
                   </div>
-                  <div className="w-full bg-gray-100 rounded-full h-1.5 mb-3.5 overflow-hidden">
-                    <div className="bg-green-500 h-1.5 rounded-full" style={{width:'80%'}}/>
+                  <div className="h-1.5 bg-white rounded-full overflow-hidden">
+                    <div className="h-full bg-[#1D4ED8] rounded-full anim-bar-fill" style={{width:"80%"}}/>
                   </div>
-                  <div className="space-y-2.5">
-                    <div className="bg-green-50/70 rounded-xl px-3 py-2 border border-green-100/30">
-                      <p className="text-[10px] font-bold text-green-800">✓ Detected Strength</p>
-                      <p className="text-[10px] text-green-600 leading-relaxed mt-0.5">Structured documentation of change controls and immediate stakeholder syncs.</p>
-                    </div>
-                    <div className="bg-blue-50/70 rounded-xl px-3 py-2 border border-blue-100/30">
-                      <p className="text-[10px] font-bold text-blue-800">💡 Recommended Follow-up</p>
-                      <p className="text-[10px] text-blue-600 leading-relaxed mt-0.5 italic">"What metrics did you track to confirm stakeholders remained aligned?"</p>
-                    </div>
+                </div>
+                <div className="space-y-2 text-[10px]">
+                  <div className="bg-[#F0FDF4] border border-[#BBF7D0]/50 rounded-lg p-2.5">
+                    <p className="font-bold text-green-800 mb-0.5">✓ Strong documentation of change controls</p>
+                  </div>
+                  <div className="bg-[#EFF6FF] border border-[#BFDBFE]/50 rounded-lg p-2.5">
+                    <p className="font-bold text-blue-800 mb-0.5">↗ Recommended: Follow up on stakeholder sync frequency</p>
                   </div>
                 </div>
               </div>
@@ -169,99 +167,157 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Platform Features Section */}
-      <section id="features" className="py-24 px-5 bg-white border-y border-[#EDE9FF]/80">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-900 tracking-tight mb-4">Enterprise-grade capabilities, built for speed</h2>
-            <p className="text-lg text-gray-500 max-w-2xl mx-auto">No complex configurations. Just an intuitive workspace to evaluate talent fairly and efficiently.</p>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {features.map((f, i) => (
-              <div key={i} className="bg-[#F8F7FF] rounded-2xl p-6 border border-[#EDE9FF] card-lift group">
-                <div className="text-3xl mb-4 transition-transform duration-300 group-hover:scale-110 inline-block">{f.icon}</div>
-                <h3 className="text-base font-bold text-gray-900 mb-2">{f.title}</h3>
-                <p className="text-sm text-gray-500 leading-relaxed">{f.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Methodology Section */}
-      <section id="how-it-works" className="py-24 px-5 bg-[#F8F7FF] border-b border-[#EDE9FF]/80">
+      {/* ── FEATURES ── */}
+      <section id="features" className="py-20 px-6 bg-white border-y border-[#E2E8F0]">
         <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-900 tracking-tight">Structured assessment methodology</h2>
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-extrabold text-[#0F172A] tracking-tight mb-3">Enterprise-grade capabilities, built for speed</h2>
+            <p className="text-[#475569] text-base">No complex configurations. Just an intuitive workspace to evaluate talent fairly and efficiently.</p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {steps.map((s, i) => (
-              <div key={i} className="bg-white rounded-2xl p-6 border border-[#EDE9FF] flex gap-5 card-lift">
-                <div className="shrink-0 w-12 h-12 rounded-2xl brand-gradient flex items-center justify-center font-mono text-sm font-bold text-white shadow-md shadow-purple-100">{s.n}</div>
-                <div>
-                  <h3 className="font-bold text-gray-900 mb-2">{s.title}</h3>
-                  <p className="text-sm text-gray-500 leading-relaxed">{s.desc}</p>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+            {features.map((f, i) => (
+              <div key={i} className="card card-hover p-6" style={{animationDelay:`${i*80}ms`}}>
+                <div className="w-10 h-10 rounded-xl bg-[#EFF6FF] text-[#1D4ED8] flex items-center justify-center mb-4">
+                  {f.icon}
                 </div>
+                <h3 className="font-bold text-[#0F172A] text-[15px] mb-2">{f.title}</h3>
+                <p className="text-sm text-[#475569] leading-relaxed">{f.desc}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* V2 Spotlight Section (RAG Candidate Match) */}
-      <section id="v2-spotlight" className="py-24 px-5 bg-white relative overflow-hidden">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-purple-100/30 blur-3xl rounded-full pointer-events-none"></div>
-        <div className="max-w-4xl mx-auto text-center relative z-10">
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-[#EDE9FF] text-[#6C47FF] uppercase tracking-wider mb-6">
-            ✨ Coming Soon in V2
-          </span>
-          <h2 className="text-3xl sm:text-5xl font-extrabold text-gray-900 tracking-tight mb-6">
-            Intelligent Candidate Matchmaking
-          </h2>
-          <p className="text-lg text-gray-500 mb-10 leading-relaxed max-w-2xl mx-auto">
-            Recruiting isn't just about interviews—it's about finding the right starting point. We're launching an smart matchmaking system that maps your entire candidate pool directly to open roles.
-          </p>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-left mb-12">
-            <div className="bg-[#F8F7FF] border border-[#EDE9FF] p-6 rounded-2xl">
-              <div className="text-2xl mb-3">📂</div>
-              <h4 className="font-bold text-gray-900 mb-2">Resume Pool Ingestion</h4>
-              <p className="text-sm text-gray-500 leading-relaxed">
-                Upload your resumes and paste the job parameters. Our system parses candidate skills, achievements, and career progressions instantly.
-              </p>
-            </div>
-            <div className="bg-[#F8F7FF] border border-[#EDE9FF] p-6 rounded-2xl">
-              <div className="text-2xl mb-3">🔍</div>
-              <h4 className="font-bold text-gray-900 mb-2">Evidence-Backed Recommendations</h4>
-              <p className="text-sm text-gray-500 leading-relaxed">
-                Using advanced RAG (Retrieval-Augmented Generation), we highlight exactly why a candidate matches the role with linked source citations, guaranteeing 100% transparency.
-              </p>
-            </div>
+      {/* ── HOW IT WORKS ── */}
+      <section id="how-it-works" className="py-20 px-6 bg-[#F8FAFC]">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-14">
+            <h2 className="text-3xl font-extrabold text-[#0F172A] tracking-tight mb-3">Structured assessment methodology</h2>
+            <p className="text-[#475569] text-base">Our 4-step workflow ensures every hire is evaluated with consistent, bias-free standards.</p>
           </div>
-
-          <div className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 border border-[#EDE9FF] p-8 rounded-3xl">
-            <h4 className="font-bold text-gray-900 mb-2 text-lg">Want early access to V2 preview features?</h4>
-            <p className="text-sm text-gray-500 mb-4">No signups required. Keep using the platform for your current sessions, and your dashboard will automatically unlock the pilot matching module soon.</p>
-            <Link href={session ? "/setup" : "/api/auth/signin"} className="inline-flex items-center gap-1 bg-[#6C47FF] hover:bg-[#5A3AE0] text-white px-6 py-3 rounded-xl text-sm font-semibold transition">
-              Get Started Free
-            </Link>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 items-start">
+            {steps.map((s, i) => (
+              <div key={i} className="flex flex-col items-center text-center anim-fade-up" style={{animationDelay:`${i*90}ms`}}>
+                <div className="w-12 h-12 rounded-full bg-[#1D4ED8] flex items-center justify-center text-white font-black text-sm mb-4 shadow-[0_4px_16px_rgba(29,78,216,0.28)]">
+                  {s.n}
+                </div>
+                <p className="font-bold text-[#0F172A] text-sm mb-1.5">{s.title}</p>
+                <p className="text-xs text-[#475569] leading-relaxed">{s.desc}</p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="bg-gray-950 text-gray-400 py-12 px-5 border-t border-gray-900">
-        <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg brand-gradient flex items-center justify-center text-white text-xs font-bold">C</div>
-            <span className="text-white font-bold text-base">CopilotHire</span>
+      {/* ── V2 MATCHMAKING ── */}
+      <section id="v2-spotlight" className="py-20 px-6 bg-white border-t border-[#E2E8F0]">
+        <div className="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          <div>
+            <span className="inline-flex items-center gap-1.5 text-[12px] font-bold text-amber-600 bg-amber-50 border border-amber-200 rounded-full px-3 py-1 mb-5">
+              ✦ COMING SOON IN V2
+            </span>
+            <h2 className="text-4xl font-extrabold text-[#0F172A] leading-tight tracking-tight mb-5">
+              Intelligent Candidate Matchmaking
+            </h2>
+            <p className="text-[#475569] text-base leading-relaxed mb-8">
+              Recruiting isn't just about interviews—it's about finding the right starting point. We're launching a smart matchmaking system that maps your entire candidate pool directly to open roles using advanced semantic search.
+            </p>
+            <div className="space-y-4">
+              {[
+                { title:"Resume Pool Ingestion", desc:"Upload folders of resumes. Our parser identifies achievements and career progressions instantly." },
+                { title:"Evidence-Backed Recommendations", desc:"Using RAG (Retrieval-Augmented Generation), we highlight exactly why a candidate matches the role." },
+              ].map((item, i) => (
+                <div key={i} className="flex items-start gap-3">
+                  <div className="w-5 h-5 rounded-full bg-[#EFF6FF] border border-[#BFDBFE] flex items-center justify-center shrink-0 mt-0.5">
+                    <svg viewBox="0 0 12 12" fill="none" className="w-3 h-3"><path d="M2 6l3 3 5-5" stroke="#1D4ED8" strokeWidth="1.5" strokeLinecap="round"/></svg>
+                  </div>
+                  <div>
+                    <p className="font-semibold text-[#0F172A] text-sm">{item.title}</p>
+                    <p className="text-xs text-[#475569] mt-0.5 leading-relaxed">{item.desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
-          <p className="text-sm">© 2026 CopilotHire. Structuring global talent evaluation. All rights reserved.</p>
-          <div className="flex gap-6 text-sm">
-            <a href="#" className="hover:text-white transition">Privacy</a>
-            <a href="#" className="hover:text-white transition">Terms</a>
-            {session && <Link href="/dashboard" className="hover:text-white transition">Dashboard</Link>}
+          {/* Mock card */}
+          <div className="card p-6 shadow-[0_8px_32px_rgba(15,23,42,0.08)]">
+            <div className="bg-[#1D4ED8] rounded-xl p-4 mb-4 text-white flex items-center justify-between">
+              <div>
+                <p className="font-bold text-sm">Senior Product Designer</p>
+                <p className="text-xs text-blue-200 mt-0.5">98% Match Probability</p>
+              </div>
+              <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
+                <svg viewBox="0 0 16 16" fill="none" className="w-4 h-4"><path d="M8 1l1.8 3.6L14 5.4l-3 2.9.7 4.1L8 10.5l-3.7 1.9.7-4.1-3-2.9 4.2-.8z" fill="white"/></svg>
+              </div>
+            </div>
+            <div className="space-y-2.5">
+              {[85, 70, 92].map((w, i) => (
+                <div key={i} className="flex items-center gap-3">
+                  <div className="w-6 h-6 rounded-full bg-[#F1F5F9] shrink-0"/>
+                  <div className="flex-1 h-2 bg-[#F1F5F9] rounded-full overflow-hidden">
+                    <div className="h-full bg-[#1D4ED8] rounded-full anim-bar-fill" style={{width:`${w}%`,animationDelay:`${i*100}ms`}}/>
+                  </div>
+                  <span className="text-xs font-bold text-[#475569]">{w}%</span>
+                </div>
+              ))}
+            </div>
           </div>
+        </div>
+      </section>
+
+      {/* ── CTA BANNER ── */}
+      <section className="py-16 px-6 bg-[#1D4ED8]">
+        <div className="max-w-2xl mx-auto text-center">
+          <h2 className="text-3xl font-extrabold text-white mb-4">Want early access to V2 preview features?</h2>
+          <p className="text-blue-200 text-sm mb-8 leading-relaxed">
+            No signups required. Keep using your current sessions, and your dashboard will automatically unlock the pilot matching module soon.
+          </p>
+          <Link href={session ? "/setup" : "/api/auth/signin"}
+            className="inline-flex items-center gap-2 bg-white text-[#1D4ED8] px-8 py-3.5 rounded-lg text-[15px] font-bold hover:bg-blue-50 transition active:scale-[0.98]">
+            Get Started Free
+          </Link>
+        </div>
+      </section>
+
+      {/* ── FOOTER ── */}
+      <footer className="bg-white border-t border-[#E2E8F0] py-12 px-6">
+        <div className="max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-4 gap-8">
+          <div>
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-6 h-6 rounded-md bg-[#1D4ED8] flex items-center justify-center">
+                <svg viewBox="0 0 16 16" fill="none" className="w-3.5 h-3.5"><circle cx="8" cy="8" r="6" stroke="white" strokeWidth="1.5"/><path d="M5 8h6M8 5v6" stroke="white" strokeWidth="1.5" strokeLinecap="round"/></svg>
+              </div>
+              <span className="font-bold text-[#0F172A] text-sm">CopilotHire</span>
+            </div>
+            <p className="text-xs text-[#475569] leading-relaxed">Elevating recruitment standards through AI-driven calibration and empathetic assessment tools.</p>
+          </div>
+          <div>
+            <p className="text-xs font-bold text-[#0F172A] uppercase tracking-wider mb-3">Product</p>
+            <div className="space-y-2">
+              {["Features","Roadmap","Pricing"].map(l=>(
+                <a key={l} href="#" className="block text-sm text-[#475569] hover:text-[#0F172A] transition">{l}</a>
+              ))}
+            </div>
+          </div>
+          <div>
+            <p className="text-xs font-bold text-[#0F172A] uppercase tracking-wider mb-3">Company</p>
+            <div className="space-y-2">
+              {["About","Careers"].map(l=>(
+                <a key={l} href="#" className="block text-sm text-[#475569] hover:text-[#0F172A] transition">{l}</a>
+              ))}
+            </div>
+          </div>
+          <div>
+            <p className="text-xs font-bold text-[#0F172A] uppercase tracking-wider mb-3">Legal</p>
+            <div className="space-y-2">
+              {["Privacy","Terms"].map(l=>(
+                <a key={l} href="#" className="block text-sm text-[#475569] hover:text-[#0F172A] transition">{l}</a>
+              ))}
+            </div>
+          </div>
+        </div>
+        <div className="max-w-6xl mx-auto mt-10 pt-6 border-t border-[#F1F5F9]">
+          <p className="text-xs text-[#94A3B8]">© 2026 CopilotHire AI. All rights reserved.</p>
         </div>
       </footer>
     </div>

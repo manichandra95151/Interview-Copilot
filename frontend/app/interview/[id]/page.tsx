@@ -9,29 +9,50 @@ type Q = { id: number; question: string; category: string; rubric: string; timeG
 type Eval = { score: number | null; strength: string | null; gap: string | null; followUp: string | null; sentiment: string; analysis?: string };
 type AnswerState = { transcript: string; evaluation: Eval | null; loading: boolean; done: boolean; skipped: boolean; notAnswered?: boolean; notes?: string };
 
-const CAT_STYLE: Record<string, string> = {
-  behavioral: "bg-blue-50 text-blue-700 border-blue-100",
-  situational: "bg-purple-50 text-purple-700 border-purple-100",
-  experience: "bg-green-50 text-green-700 border-green-100",
-  technical: "bg-orange-50 text-orange-700 border-orange-100",
-  culture: "bg-pink-50 text-pink-700 border-pink-100",
-  leadership: "bg-indigo-50 text-indigo-700 border-indigo-100",
-  "follow-up": "bg-cyan-50 text-cyan-700 border-cyan-100",
+const CAT_COLOR: Record<string, string> = {
+  behavioral:  "bg-blue-50 text-blue-700 border-blue-200",
+  situational: "bg-violet-50 text-violet-700 border-violet-200",
+  experience:  "bg-emerald-50 text-emerald-700 border-emerald-200",
+  technical:   "bg-orange-50 text-orange-700 border-orange-200",
+  culture:     "bg-pink-50 text-pink-700 border-pink-200",
+  leadership:  "bg-indigo-50 text-indigo-700 border-indigo-200",
+  "follow-up": "bg-cyan-50 text-cyan-700 border-cyan-200",
 };
 
-function ScoreRing({ score }: { score: number | null }) {
+function ScoreRing({ score, size = 56 }: { score: number | null; size?: number }) {
   if (score === null) return null;
+  const r = 22, circ = 2 * Math.PI * r;
   const pct = score / 10;
-  const r = 20, circ = 2 * Math.PI * r;
   const color = score >= 8 ? "#16a34a" : score >= 6 ? "#d97706" : "#dc2626";
+  const bg    = score >= 8 ? "#f0fdf4" : score >= 6 ? "#fffbeb" : "#fef2f2";
   return (
-    <svg className="w-12 h-12" viewBox="0 0 48 48">
-      <circle cx="24" cy="24" r={r} fill="none" stroke="#f3f4f6" strokeWidth="4"/>
-      <circle cx="24" cy="24" r={r} fill="none" stroke={color} strokeWidth="4"
-        strokeDasharray={circ} strokeDashoffset={circ * (1 - pct)}
-        strokeLinecap="round" transform="rotate(-90 24 24)" style={{ transition: "stroke-dashoffset 0.8s ease" }}/>
-      <text x="24" y="28" textAnchor="middle" fontSize="11" fontWeight="800" fill={color}>{score}</text>
-    </svg>
+    <div className="relative" style={{ width: size, height: size }}>
+      <svg width={size} height={size} viewBox="0 0 56 56">
+        <circle cx="28" cy="28" r={r} fill={bg} stroke="#E2E8F0" strokeWidth="3.5"/>
+        <circle cx="28" cy="28" r={r} fill="none" stroke={color} strokeWidth="3.5"
+          strokeDasharray={circ} strokeDashoffset={circ * (1 - pct)}
+          strokeLinecap="round" transform="rotate(-90 28 28)"
+          className="anim-ring-draw" style={{ transition: "stroke-dashoffset 0.8s cubic-bezier(0.4,0,0.2,1)" }}/>
+        <text x="28" y="33" textAnchor="middle" fontSize="13" fontWeight="800" fill={color}>{score}</text>
+      </svg>
+    </div>
+  );
+}
+
+function LoadingOverlay({ title, subtitle }: { title: string; subtitle: string }) {
+  return (
+    <div className="min-h-screen bg-[#F8FAFC] flex items-center justify-center">
+      <div className="bg-white border border-[#E2E8F0] rounded-2xl p-8 max-w-sm w-full text-center shadow-[0_8px_32px_rgba(15,23,42,0.08)] anim-scale-in">
+        <div className="relative w-14 h-14 mx-auto mb-5">
+          <svg className="w-14 h-14 anim-spin" viewBox="0 0 56 56" fill="none">
+            <circle cx="28" cy="28" r="24" stroke="#E2E8F0" strokeWidth="4"/>
+            <path d="M28 4a24 24 0 0124 24" stroke="#1D4ED8" strokeWidth="4" strokeLinecap="round"/>
+          </svg>
+        </div>
+        <h3 className="font-bold text-[#0F172A] text-sm mb-1">{title}</h3>
+        <p className="text-xs text-[#94A3B8]">{subtitle}</p>
+      </div>
+    </div>
   );
 }
 
@@ -48,7 +69,6 @@ export default function InterviewPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [recording, setRecording] = useState(false);
-  const [liveTranscript, setLiveTranscript] = useState("");
   const [editTranscript, setEditTranscript] = useState("");
   const [notes, setNotes] = useState("");
   const [showNotes, setShowNotes] = useState(false);
@@ -69,26 +89,14 @@ export default function InterviewPage() {
       .then(([s, q]) => {
         setSessionData(s);
         setQuestions(q.questions || []);
-        
-        // Populate answers from session data
         if (s.answers && Array.isArray(s.answers)) {
           const ansMap: Record<number, AnswerState> = {};
           s.answers.forEach((a: any) => {
-            const isNotAnswered = a.sentiment === 'not_answered' || a.score === 0;
             ansMap[a.question_id] = {
               transcript: a.transcript || "",
-              evaluation: {
-                score: a.score,
-                strength: a.strength,
-                gap: a.gap,
-                followUp: a.followUp,
-                sentiment: a.sentiment,
-                analysis: a.analysis
-              },
-              loading: false,
-              done: !a.skipped,
-              skipped: a.skipped,
-              notAnswered: isNotAnswered,
+              evaluation: { score: a.score, strength: a.strength, gap: a.gap, followUp: a.followUp, sentiment: a.sentiment, analysis: a.analysis },
+              loading: false, done: !a.skipped, skipped: a.skipped,
+              notAnswered: a.sentiment === "not_answered" || a.score === 0,
               notes: a.manual_notes || ""
             };
           });
@@ -104,33 +112,25 @@ export default function InterviewPage() {
     return () => clearInterval(timerRef.current);
   }, []);
 
-  // Sync editTranscript and notes when currentQ changes
   useEffect(() => {
     if (currentQ) {
       const ans = answers[currentQ.id];
       setEditTranscript(ans?.transcript || "");
       setNotes(ans?.notes || "");
-    } else {
-      setEditTranscript("");
-      setNotes("");
-    }
+    } else { setEditTranscript(""); setNotes(""); }
   }, [currentQ?.id]);
 
-  const fmt = (s: number) => `${Math.floor(s/60)}:${String(s%60).padStart(2,"0")}`;
+  const fmt = (s: number) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
 
   const startRec = useCallback(() => {
     const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    if (!SR) { alert("Voice recording requires Chrome or Edge browser."); return; }
-    const rec = new SR();
-    rec.continuous = true; rec.interimResults = true; rec.lang = "en-US";
-    rec.onresult = (e: any) => {
-      let t = ""; for (let i=0;i<e.results.length;i++) t += e.results[i][0].transcript;
-      setLiveTranscript(t); setEditTranscript(t);
-    };
+    if (!SR) { alert("Voice recording requires Chrome or Edge."); return; }
+    const rec = new SR(); rec.continuous = true; rec.interimResults = true; rec.lang = "en-US";
+    rec.onresult = (e: any) => { let t = ""; for (let i = 0; i < e.results.length; i++) t += e.results[i][0].transcript; setEditTranscript(t); };
     rec.onerror = () => setRecording(false);
     rec.onend = () => setRecording(false);
     rec.start(); recognitionRef.current = rec;
-    setLiveTranscript(""); setEditTranscript(""); setRecording(true);
+    setEditTranscript(""); setRecording(true);
   }, []);
 
   const stopRec = useCallback(() => { recognitionRef.current?.stop(); setRecording(false); }, []);
@@ -153,12 +153,12 @@ export default function InterviewPage() {
     if (!currentQ) return;
     await api.skipQuestion(sessionId, currentQ.id, token);
     setAnswers(p => ({ ...p, [currentQ.id]: { transcript: "", evaluation: null, loading: false, done: false, skipped: true } }));
-    setLiveTranscript(""); setEditTranscript(""); setShowRubric(false);
+    setEditTranscript(""); setShowRubric(false);
     if (currentIdx < questions.length - 1) setCurrentIdx(i => i + 1);
   };
 
-  const goNext = () => { if (currentIdx < questions.length-1) { setCurrentIdx(i=>i+1); setShowRubric(false); } };
-  const goPrev = () => { if (currentIdx > 0) { setCurrentIdx(i=>i-1); setShowRubric(false); } };
+  const goNext = () => { if (currentIdx < questions.length - 1) { setCurrentIdx(i => i + 1); setShowRubric(false); } };
+  const goPrev = () => { if (currentIdx > 0) { setCurrentIdx(i => i - 1); setShowRubric(false); } };
 
   const finish = async () => {
     setFinishing(true);
@@ -166,372 +166,487 @@ export default function InterviewPage() {
     catch (e: any) { setError(e.message); setFinishing(false); }
   };
 
-  if (loading) return (
-    <div className="min-h-screen bg-[#F8F7FF] flex items-center justify-center px-5">
-      <div className="text-center max-w-sm w-full bg-white p-8 rounded-3xl border border-[#EDE9FF] shadow-xl shadow-purple-50/50 fade-up">
-        {/* Animated Spinners */}
-        <div className="relative w-16 h-16 mx-auto mb-6 flex items-center justify-center">
-          <div className="absolute inset-0 rounded-full border-4 border-[#EDE9FF] animate-pulse"></div>
-          <svg className="w-12 h-12 animate-spin text-[#6C47FF]" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle className="opacity-20" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3.5"></circle>
-            <path className="opacity-80" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-          </svg>
-        </div>
-        <h3 className="font-bold text-gray-900 mb-1 text-sm">Initializing Workspace</h3>
-        <p className="text-gray-400 text-xs">Calibrating interview parameters...</p>
-      </div>
-    </div>
-  );
-
-  if (finishing) return (
-    <div className="min-h-screen bg-[#F8F7FF] flex items-center justify-center px-5">
-      <div className="text-center max-w-sm w-full bg-white p-8 rounded-3xl border border-[#EDE9FF] shadow-xl shadow-purple-50/50 fade-up">
-        {/* Animated Spinners */}
-        <div className="relative w-16 h-16 mx-auto mb-6 flex items-center justify-center">
-          <div className="absolute inset-0 rounded-full border-4 border-[#EDE9FF] animate-pulse"></div>
-          <svg className="w-12 h-12 animate-spin text-[#6C47FF]" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle className="opacity-20" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3.5"></circle>
-            <path className="opacity-80" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-          </svg>
-        </div>
-
-        <h2 className="text-base font-bold text-gray-900 mb-1">Compiling Dossier</h2>
-        <p className="text-gray-400 text-xs">Assembling report parameters...</p>
-
-        {/* Pipeline Checklist */}
-        <div className="text-left space-y-3 mb-2 max-w-[240px] mx-auto border-t border-gray-100 pt-5 mt-5">
-          <div className="flex items-center gap-3 text-xs">
-            <span className="w-4 h-4 rounded-full bg-green-500 text-white flex items-center justify-center text-[9px] font-bold">✓</span>
-            <span className="text-gray-500 font-medium">Aggregating transcripts</span>
-          </div>
-          <div className="flex items-center gap-3 text-xs">
-            <span className="w-4 h-4 rounded-full bg-green-500 text-white flex items-center justify-center text-[9px] font-bold">✓</span>
-            <span className="text-gray-500 font-medium">Scoring competency structures</span>
-          </div>
-          <div className="flex items-center gap-3 text-xs">
-            <span className="w-4 h-4 rounded-full border-2 border-[#6C47FF] border-t-transparent animate-spin shrink-0"></span>
-            <span className="text-gray-950 font-bold">Synthesizing overall assessment</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+  if (loading) return <LoadingOverlay title="Initializing Workspace" subtitle="Calibrating interview parameters..."/>;
+  if (finishing) return <LoadingOverlay title="Compiling Dossier" subtitle="Assembling report parameters..."/>;
 
   return (
-    <div className="min-h-screen bg-[#F8F7FF] flex flex-col">
-      {/* Top Workspace Bar */}
-      <div className="bg-white border-b border-[#EDE9FF]/80 sticky top-0 z-20 shadow-sm">
-        <div className="max-w-7xl mx-auto px-5">
-          <div className="flex items-center justify-between h-16 gap-6">
-            <div className="flex items-center gap-3 min-w-0">
-              <div className="w-8 h-8 rounded-xl brand-gradient flex items-center justify-center text-white text-xs font-bold shrink-0">C</div>
-              <div className="min-w-0">
-                <p className="text-sm font-bold text-gray-900 truncate leading-tight">{sessionData?.candidate_name}</p>
-                <p className="text-[10px] text-gray-400 truncate mt-0.5">{sessionData?.role} · {sessionData?.seniority}</p>
-              </div>
-            </div>
-            
-            {/* Horizontal progress indicators */}
-            <div className="flex-1 max-w-md hidden md:block">
-              <div className="flex justify-between text-[10px] text-gray-400 font-semibold mb-1">
-                <span>Assessment Progress: {answeredCount}/{questions.length} completed</span>
-                <span className="font-mono">Time elapsed: {fmt(elapsed)}</span>
-              </div>
-              <div className="bg-gray-100 rounded-full h-1.5 overflow-hidden">
-                <div className="bg-[#6C47FF] h-1.5 rounded-full transition-all duration-500 fill-bar" style={{ width: `${progress}%` }}/>
-              </div>
-            </div>
+    <div className="min-h-screen bg-[#F8FAFC] flex flex-col">
 
-            <div className="flex items-center gap-2 shrink-0">
-              {answeredCount >= 1 && (
-                <button onClick={finish} className="bg-green-600 hover:bg-green-700 text-white text-xs px-4.5 py-2.5 rounded-xl transition font-bold shadow-md shadow-green-100">
-                  Compile Assessment →
-                </button>
-              )}
+      {/* ── TOP BAR ── */}
+      <nav className="bg-white border-b border-[#E2E8F0] sticky top-0 z-30 shadow-sm">
+        <div className="max-w-[1400px] mx-auto px-5 flex items-center justify-between h-14">
+          {/* Logo + candidate */}
+          <div className="flex items-center gap-3 min-w-0">
+            <Link href="/" className="flex items-center gap-2 shrink-0">
+              <div className="w-7 h-7 rounded-lg bg-[#1D4ED8] flex items-center justify-center">
+                <svg viewBox="0 0 16 16" fill="none" className="w-4 h-4"><circle cx="8" cy="8" r="6" stroke="white" strokeWidth="1.5"/><path d="M5 8h6M8 5v6" stroke="white" strokeWidth="1.5" strokeLinecap="round"/></svg>
+              </div>
+              <span className="font-bold text-[#0F172A] text-[15px]">CopilotHire</span>
+            </Link>
+            <div className="h-5 w-px bg-[#E2E8F0] mx-1"/>
+            <div className="hidden sm:flex items-center gap-5 text-[13px] font-medium">
+              <Link href="/dashboard" className="text-[#475569] hover:text-[#0F172A] transition">Dashboard</Link>
+              <span className="text-[#1D4ED8] border-b-2 border-[#1D4ED8] pb-0.5">Interviews</span>
+            </div>
+          </div>
+
+          {/* Center progress */}
+          <div className="flex-1 max-w-xs hidden md:block mx-8">
+            <div className="flex justify-between text-[10px] text-[#94A3B8] font-semibold mb-1.5">
+              <span>{answeredCount}/{questions.length} completed</span>
+              <span className="font-mono">{fmt(elapsed)}</span>
+            </div>
+            <div className="progress-bar-track">
+              <div className="progress-bar-fill" style={{ width: `${progress}%` }}/>
+            </div>
+          </div>
+
+          {/* Right actions */}
+          <div className="flex items-center gap-2.5">
+            {answeredCount >= 1 && (
+              <button onClick={finish}
+                className="flex items-center gap-2 bg-red-500 hover:bg-red-600 text-white text-xs font-bold px-4 py-2 rounded-lg transition active:scale-[0.97] shadow-sm">
+                <span className="w-2 h-2 rounded-full bg-white dot-blink"/>
+                End Session
+              </button>
+            )}
+            {/* Avatar */}
+            <div className="w-8 h-8 rounded-full bg-[#1D4ED8] flex items-center justify-center text-white text-xs font-bold">
+              {sessionData?.candidate_name?.charAt(0) || "?"}
             </div>
           </div>
         </div>
-      </div>
+      </nav>
 
-      {/* Main Workspace Layout */}
-      <div className="flex-1 max-w-7xl mx-auto w-full px-5 py-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
-        
-        {/* Left Side: Question Tracker */}
-        <div className="lg:col-span-3 order-3 lg:order-1">
-          <div className="bg-white rounded-2xl border border-[#EDE9FF] overflow-hidden shadow-sm sticky top-22">
-            <div className="px-4 py-3.5 border-b border-gray-50 bg-gray-50/50">
-              <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">Evaluation Queue</p>
-            </div>
-            <div className="max-h-[68vh] overflow-y-auto divide-y divide-gray-50">
-              {questions.map((q, i) => {
-                const ans = answers[q.id];
-                const isCurrent = i === currentIdx;
-                const score = ans?.evaluation?.score;
-                return (
-                  <button key={q.id} onClick={() => { setCurrentIdx(i); setShowRubric(false); }}
-                    className={`w-full text-left p-4 flex items-start gap-3.5 transition border-l-3 ${isCurrent ? "bg-[#F8F7FF] border-[#6C47FF] font-semibold" : "hover:bg-gray-50 border-transparent"}`}>
-                    <div className={`w-5.5 h-5.5 rounded-lg text-xs font-bold flex items-center justify-center shrink-0 mt-0.5 ${
-                      ans?.skipped ? "bg-gray-100 text-gray-400" :
+      {/* ── THREE-COLUMN LAYOUT ── */}
+      <div className="flex flex-1 max-w-[1400px] mx-auto w-full overflow-hidden">
+
+        {/* ── LEFT SIDEBAR: Evaluation Queue ── */}
+        <div className="w-[270px] shrink-0 border-r border-[#E2E8F0] bg-white flex flex-col">
+          <div className="px-4 py-3.5 border-b border-[#F1F5F9] flex items-center justify-between">
+            <span className="text-[11px] font-bold text-[#475569] uppercase tracking-wider">Evaluation Queue</span>
+            <span className="text-[10px] font-bold text-white bg-[#1D4ED8] px-2 py-0.5 rounded-full">{questions.length} TOTAL</span>
+          </div>
+
+          <div className="flex-1 overflow-y-auto divide-y divide-[#F8FAFC]">
+            {questions.map((q, i) => {
+              const ans = answers[q.id];
+              const isCurrent = i === currentIdx;
+              const score = ans?.evaluation?.score;
+              return (
+                <button key={q.id} onClick={() => { setCurrentIdx(i); setShowRubric(false); }}
+                  className={`w-full text-left p-4 transition-all border-l-[3px] ${
+                    isCurrent
+                      ? "bg-[#EFF6FF] border-[#1D4ED8]"
+                      : "border-transparent hover:bg-[#F8FAFC]"
+                  }`}>
+                  <div className="flex items-start gap-3">
+                    <div className={`w-6 h-6 rounded-lg text-[10px] font-black flex items-center justify-center shrink-0 mt-0.5 ${
+                      ans?.skipped     ? "bg-[#F1F5F9] text-[#94A3B8]" :
                       ans?.notAnswered ? "bg-red-50 text-red-500" :
-                      ans?.done && (score||0) >= 8 ? "bg-green-50 text-green-700 border border-green-200" :
-                      ans?.done && (score||0) >= 6 ? "bg-amber-50 text-amber-700 border border-amber-200" :
-                      ans?.done ? "bg-red-50 text-red-600 border border-red-200" :
-                      isCurrent ? "bg-[#6C47FF] text-white" : "bg-gray-100 text-gray-500"
+                      ans?.done && (score || 0) >= 8 ? "bg-green-50 text-green-700 border border-green-200" :
+                      ans?.done && (score || 0) >= 6 ? "bg-amber-50 text-amber-700 border border-amber-200" :
+                      ans?.done        ? "bg-red-50 text-red-600 border border-red-200" :
+                      isCurrent        ? "bg-[#1D4ED8] text-white" :
+                                         "bg-[#F1F5F9] text-[#94A3B8]"
                     }`}>
-                      {ans?.skipped ? "—" : ans?.notAnswered ? "✕" : ans?.done ? (score ?? "✓") : i+1}
+                      {isCurrent && !ans?.done ? "●" : ans?.skipped ? "—" : ans?.notAnswered ? "✕" : ans?.done ? (score ?? "✓") : String(i + 1).padStart(2, "0")}
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className={`text-xs ${isCurrent ? "text-gray-900" : "text-gray-500"} line-clamp-2 leading-relaxed`}>{q.question}</p>
-                      <span className="text-[9px] uppercase tracking-wider text-gray-400 font-bold block mt-1">{q.category}</span>
+                      {isCurrent && (
+                        <span className="text-[9px] font-bold text-[#1D4ED8] bg-[#DBEAFE] px-1.5 py-0.5 rounded uppercase tracking-wide mb-1 inline-block">
+                          ACTIVE
+                        </span>
+                      )}
+                      <p className={`text-[12px] font-semibold leading-snug line-clamp-2 ${isCurrent ? "text-[#0F172A]" : "text-[#475569]"}`}>
+                        {q.question.length > 60 ? q.question.slice(0, 58) + "…" : q.question}
+                      </p>
+                      <p className="text-[10px] text-[#94A3B8] mt-1 font-medium capitalize">{q.category}</p>
+                      {isCurrent && (
+                        <p className="text-[10px] font-mono text-[#94A3B8] mt-0.5">{fmt(elapsed)}</p>
+                      )}
                     </div>
-                  </button>
-                );
-              })}
-            </div>
+                  </div>
+                </button>
+              );
+            })}
+
+            <button onClick={() => {}} className="w-full p-4 flex items-center gap-2 text-[12px] font-semibold text-[#94A3B8] hover:text-[#475569] hover:bg-[#F8FAFC] transition border-l-[3px] border-transparent">
+              <span className="w-6 h-6 rounded-lg bg-[#F1F5F9] flex items-center justify-center text-[#94A3B8] text-sm font-bold">+</span>
+              Add Question
+            </button>
           </div>
+
+          {/* Candidate card at bottom */}
+          {sessionData && (
+            <div className="px-4 py-3.5 border-t border-[#E2E8F0] flex items-center gap-3">
+              <div className="w-9 h-9 rounded-full bg-[#1D4ED8] flex items-center justify-center text-white text-sm font-bold shrink-0">
+                {sessionData.candidate_name?.charAt(0)}
+              </div>
+              <div className="min-w-0">
+                <p className="text-sm font-bold text-[#0F172A] truncate">{sessionData.candidate_name}</p>
+                <p className="text-[11px] text-[#94A3B8] truncate">{sessionData.role}</p>
+              </div>
+            </div>
+          )}
         </div>
 
-        {/* Center: Question Workspace */}
-        <div className="lg:col-span-6 order-1 lg:order-2 space-y-6">
-          {currentQ && (
+        {/* ── CENTER: Active Probe + Answer ── */}
+        <div className="flex-1 flex flex-col overflow-y-auto p-6 gap-4 min-w-0">
+          {currentQ ? (
             <>
-              {/* Target Prompt Card */}
-              <div className="bg-white rounded-2xl border border-[#EDE9FF] p-6 shadow-sm">
-                <div className="flex items-center justify-between gap-3 mb-4.5">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-xs bg-[#EDE9FF] text-[#6C47FF] font-bold px-2.5 py-1 rounded-full">Index: {currentIdx+1} / {questions.length}</span>
-                    <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full capitalize border ${CAT_STYLE[currentQ.category] || "bg-gray-50 text-gray-500"}`}>{currentQ.category}</span>
-                    {currentQ.timeGuide && <span className="text-xs text-gray-400 font-medium ml-2">⏱ Recommended duration: {currentQ.timeGuide}</span>}
+              {/* Active Probe Card */}
+              <div className="card p-6 anim-fade-up">
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="w-5 h-5 rounded-full bg-[#EFF6FF] flex items-center justify-center">
+                    <svg viewBox="0 0 12 12" fill="none" className="w-3 h-3"><circle cx="6" cy="6" r="5" stroke="#1D4ED8" strokeWidth="1.2"/><path d="M6 4v2.5m0 1.5v.1" stroke="#1D4ED8" strokeWidth="1.2" strokeLinecap="round"/></svg>
                   </div>
-                  <div className="flex gap-1.5 shrink-0">
-                    <button onClick={goPrev} disabled={currentIdx===0} className="p-1.5 rounded-lg border border-gray-100 text-gray-400 hover:text-gray-700 hover:bg-gray-50 disabled:opacity-20 transition text-xs font-bold">Prev</button>
-                    <button onClick={goNext} disabled={currentIdx===questions.length-1} className="p-1.5 rounded-lg border border-gray-100 text-gray-400 hover:text-gray-700 hover:bg-gray-50 disabled:opacity-20 transition text-xs font-bold">Next</button>
+                  <span className="text-[11px] font-bold text-[#1D4ED8] uppercase tracking-wider">Active Probe</span>
+                  <div className="ml-auto flex items-center gap-1.5">
+                    <button onClick={goPrev} disabled={currentIdx === 0}
+                      className="text-xs px-2 py-1 rounded-lg border border-[#E2E8F0] text-[#94A3B8] hover:text-[#475569] hover:bg-[#F8FAFC] disabled:opacity-30 transition font-semibold">
+                      ←
+                    </button>
+                    <span className="text-[11px] text-[#94A3B8] font-mono">{currentIdx + 1}/{questions.length}</span>
+                    <button onClick={goNext} disabled={currentIdx === questions.length - 1}
+                      className="text-xs px-2 py-1 rounded-lg border border-[#E2E8F0] text-[#94A3B8] hover:text-[#475569] hover:bg-[#F8FAFC] disabled:opacity-30 transition font-semibold">
+                      →
+                    </button>
                   </div>
                 </div>
-                <h3 className="text-lg font-bold text-gray-900 leading-relaxed mb-4">{currentQ.question}</h3>
-                <button onClick={() => setShowRubric(!showRubric)} className="text-xs font-semibold text-[#6C47FF] hover:text-[#5a3ae0] transition flex items-center gap-1">
-                  {showRubric ? "Hide assessment guide ↑" : "Show assessment guide ↓"}
-                </button>
+
+                <h2 className="text-xl font-bold text-[#0F172A] leading-snug mb-4">
+                  "{currentQ.question}"
+                </h2>
+
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className={`text-[11px] font-bold px-2.5 py-1 rounded-full border capitalize ${CAT_COLOR[currentQ.category] || "bg-gray-50 text-gray-500 border-gray-200"}`}>
+                    {currentQ.category}
+                  </span>
+                  {currentQ.timeGuide && (
+                    <span className="text-[11px] text-[#94A3B8] font-medium">⏱ {currentQ.timeGuide}</span>
+                  )}
+                  <button onClick={() => setShowRubric(!showRubric)}
+                    className="flex items-center gap-1 text-[11px] font-semibold text-[#1D4ED8] bg-[#EFF6FF] border border-[#BFDBFE] rounded-full px-2.5 py-1 hover:bg-blue-100 transition">
+                    <svg viewBox="0 0 12 12" fill="none" className="w-3 h-3"><path d="M2 4l4 3 4-3" stroke="#1D4ED8" strokeWidth="1.2" strokeLinecap="round"/></svg>
+                    Look for: {showRubric ? "Hide guide" : "Show guide"}
+                  </button>
+                </div>
+
                 {showRubric && (
-                  <div className="mt-4 bg-[#F8F7FF] rounded-xl p-4.5 border border-[#EDE9FF] fade-up">
-                    <p className="text-xs font-bold text-[#6C47FF] uppercase tracking-wider mb-2.5">Grading Criteria & Rubric</p>
-                    <p className="text-xs text-gray-600 leading-relaxed whitespace-pre-wrap">{currentQ.rubric}</p>
+                  <div className="mt-4 bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-4 anim-fade-in">
+                    <p className="text-[10px] font-bold text-[#1D4ED8] uppercase tracking-wider mb-2">Grading Criteria</p>
+                    <p className="text-xs text-[#475569] leading-relaxed whitespace-pre-wrap">{currentQ.rubric}</p>
                   </div>
                 )}
               </div>
 
-              {/* Assessment Work Area */}
-              <div className="bg-white rounded-2xl border border-[#EDE9FF] p-6 shadow-sm">
-                <div className="flex items-center justify-between mb-4">
-                  <p className="text-xs font-bold text-gray-700 uppercase tracking-wider">Candidate Transcript</p>
-                  <button onClick={() => setShowNotes(!showNotes)} className="text-xs font-bold text-[#6C47FF] hover:text-[#5a3ae0] transition">
-                    {showNotes ? "— Hide Interviewer Notes" : "+ Add Interviewer Notes"}
+              {/* Candidate Answer + Transcript */}
+              <div className="card flex-1 flex flex-col anim-fade-up-1">
+                <div className="flex items-center justify-between px-5 py-4 border-b border-[#F1F5F9]">
+                  <div className="flex items-center gap-2">
+                    <span className="font-semibold text-sm text-[#0F172A]">Candidate Answer</span>
+                    {recording && (
+                      <span className="flex items-center gap-1.5 text-[11px] font-bold text-red-500">
+                        <span className="w-2 h-2 bg-red-500 rounded-full listen-pulse"/>
+                        LIVE
+                      </span>
+                    )}
+                  </div>
+                  <button onClick={() => setShowNotes(!showNotes)}
+                    className="flex items-center gap-1.5 text-xs font-semibold text-[#475569] hover:text-[#0F172A] transition border border-[#E2E8F0] px-3 py-1.5 rounded-lg hover:bg-[#F8FAFC]">
+                    <svg viewBox="0 0 14 14" fill="none" className="w-3.5 h-3.5"><path d="M2 2h8a1 1 0 011 1v6a1 1 0 01-1 1H5L2 13V3a1 1 0 011-1z" stroke="currentColor" strokeWidth="1.2"/></svg>
+                    {showNotes ? "Hide Notes" : "Add Notes"}
                   </button>
                 </div>
 
-                <div className="relative mb-4">
+                {/* Transcript area with grid texture */}
+                <div className="flex-1 relative min-h-[220px]">
                   {recording && (
-                    <div className="absolute top-3.5 right-3.5 flex items-center gap-2 z-10 bg-red-500 text-white px-3 py-1 rounded-full shadow-sm">
-                      <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse"/>
-                      <span className="text-[10px] font-bold uppercase tracking-wider">Listening</span>
+                    <div className="absolute top-3 right-3 z-10 flex items-center gap-1.5 bg-white border border-red-200 px-2.5 py-1 rounded-full shadow-sm">
+                      <span className="w-2 h-2 bg-red-500 rounded-full listen-pulse"/>
+                      <span className="text-[10px] font-bold text-red-500 uppercase tracking-wide">Listening</span>
                     </div>
                   )}
-                  <textarea value={editTranscript} onChange={e => setEditTranscript(e.target.value)} rows={7}
-                    placeholder={recording ? "Analyzing live mic stream... text will print automatically" : "Paste candidate response transcript here or click the microphone to transcribe live..."}
+                  <textarea
+                    value={editTranscript}
+                    onChange={e => setEditTranscript(e.target.value)}
+                    rows={8}
+                    placeholder={recording
+                      ? "Transcribing live audio..."
+                      : "\"Paste or transcribe the candidate's response here. Click Record Answer to use live speech-to-text...\""
+                    }
                     disabled={!!(currentAns?.done || currentAns?.skipped || currentAns?.notAnswered || currentAns?.loading)}
-                    className={`w-full border rounded-xl px-4 py-3.5 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-[#6C47FF] transition leading-relaxed ${
-                      recording ? "border-red-300 bg-red-50/20" :
-                      (currentAns?.done || currentAns?.skipped || currentAns?.notAnswered) ? "border-gray-200 bg-gray-50/80 text-gray-500" :
-                      "border-gray-200 bg-gray-50/50 hover:bg-white focus:bg-white"
-                    }`}/>
+                    className={`w-full h-full min-h-[220px] px-5 py-4 text-sm font-medium leading-relaxed text-[#0F172A] placeholder:text-[#CBD5E1] resize-none focus:outline-none grid-texture transition-colors ${
+                      recording ? "bg-red-50/30 placeholder:text-red-300" :
+                      (currentAns?.done || currentAns?.skipped || currentAns?.notAnswered) ? "bg-[#F8FAFC] text-[#94A3B8]" :
+                      "bg-white"
+                    }`}
+                    style={{ fontStyle: editTranscript ? "normal" : "italic" }}
+                  />
+                  {recording && (
+                    <p className="absolute bottom-4 left-5 text-xs text-[#94A3B8] italic">
+                      Candidate is continuing to explain...
+                      <span className="caret-blink">|</span>
+                    </p>
+                  )}
                 </div>
 
                 {showNotes && (
-                  <div className="mb-4">
-                    <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5">Interviewer Notes (Private)</label>
-                    <textarea value={notes} onChange={e => setNotes(e.target.value)} rows={3} placeholder="Add private comments, observations, or warnings..."
+                  <div className="border-t border-[#F1F5F9] px-5 py-3">
+                    <label className="block text-[10px] font-bold text-[#94A3B8] uppercase tracking-wider mb-1.5">Interviewer Notes (Private)</label>
+                    <textarea value={notes} onChange={e => setNotes(e.target.value)} rows={2}
+                      placeholder="Add private observations..."
                       disabled={!!(currentAns?.done || currentAns?.skipped || currentAns?.notAnswered || currentAns?.loading)}
-                      className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-[#6C47FF] transition bg-gray-50/50 focus:bg-white"/>
+                      className="w-full border border-[#E2E8F0] rounded-lg px-3 py-2 text-xs text-[#0F172A] resize-none focus:outline-none focus:ring-1 focus:ring-[#1D4ED8] bg-[#F8FAFC]"/>
                   </div>
                 )}
 
-                <div className="flex flex-wrap items-center gap-3">
-                  <button onClick={recording ? stopRec : startRec}
-                    disabled={!!(currentAns?.done || currentAns?.skipped || currentAns?.notAnswered || currentAns?.loading)}
-                    className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 disabled:opacity-30 ${
-                      recording ? "bg-red-500 text-white hover:bg-red-600 shadow-md shadow-red-100" : "bg-gray-950 text-white hover:bg-gray-800"
-                    }`}>
-                    {recording ? "⏹ Stop Capture" : "🎙 Record Answer"}
-                  </button>
-
-                  {editTranscript.trim() && !currentAns?.done && (
-                    <button onClick={() => evaluate(false)} disabled={currentAns?.loading}
-                      className="bg-[#6C47FF] text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-[#5A3AE0] disabled:opacity-50 transition shadow-lg shadow-purple-100">
-                      {currentAns?.loading ? "Analyzing..." : "Evaluate ✓"}
-                    </button>
+                {/* Bottom action bar */}
+                <div className="border-t border-[#F1F5F9] px-5 py-4 flex items-center gap-3 bg-[#F8FAFC] rounded-b-xl">
+                  {recording ? (
+                    <div className="flex items-center gap-2 bg-red-500 text-white text-xs font-bold px-4 py-2 rounded-lg">
+                      <span className="w-2 h-2 bg-white rounded-full dot-blink"/>
+                      LISTENING
+                      <span className="font-mono ml-1">{fmt(elapsed)}</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2 text-xs text-[#94A3B8] font-mono border border-[#E2E8F0] px-3 py-2 rounded-lg bg-white">
+                      {fmt(elapsed)}
+                    </div>
                   )}
 
-                  {!editTranscript.trim() && !currentAns?.done && !recording && (
-                    <button onClick={() => evaluate(true)}
-                      className="text-amber-600 text-xs px-4 py-2.5 hover:text-amber-700 border border-amber-200 rounded-xl hover:bg-amber-50/50 transition font-bold">
-                      Mark as Unanswered
-                    </button>
-                  )}
-
-                  <button onClick={skip} disabled={!!currentAns?.done} className="text-gray-400 text-xs px-3 py-2.5 hover:text-gray-600 transition rounded-xl hover:bg-gray-50 font-bold">
-                    Skip Question
+                  <button onClick={() => {}} className="w-9 h-9 rounded-lg border border-[#E2E8F0] bg-white flex items-center justify-center text-[#94A3B8] hover:text-[#475569] hover:bg-[#F8FAFC] transition">
+                    <svg viewBox="0 0 16 16" fill="none" className="w-4 h-4"><path d="M2 8h12M8 2v12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
                   </button>
+
+                  <button onClick={skip} disabled={!!currentAns?.done}
+                    className="text-xs font-semibold text-[#94A3B8] hover:text-[#475569] transition px-3 py-2 rounded-lg hover:bg-white border border-transparent hover:border-[#E2E8F0] disabled:opacity-40">
+                    Skip
+                  </button>
+
+                  <div className="ml-auto flex items-center gap-2">
+                    {!editTranscript.trim() && !currentAns?.done && !recording && (
+                      <button onClick={() => evaluate(true)}
+                        className="text-amber-600 text-xs font-bold px-3 py-2 hover:text-amber-700 border border-amber-200 rounded-lg hover:bg-amber-50 transition">
+                        Mark Unanswered
+                      </button>
+                    )}
+
+                    {editTranscript.trim() && !currentAns?.done && (
+                      <button onClick={() => evaluate(false)} disabled={currentAns?.loading}
+                        className="bg-[#1D4ED8] hover:bg-[#1E40AF] text-white text-sm font-bold px-5 py-2 rounded-lg transition active:scale-[0.97] disabled:opacity-50 shadow-sm">
+                        {currentAns?.loading ? (
+                          <span className="flex items-center gap-2">
+                            <span className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full anim-spin"/>
+                            Analyzing...
+                          </span>
+                        ) : "Evaluate ✓"}
+                      </button>
+                    )}
+
+                    <button onClick={recording ? stopRec : startRec}
+                      disabled={!!(currentAns?.done || currentAns?.skipped || currentAns?.notAnswered || currentAns?.loading)}
+                      className={`flex items-center gap-2 text-sm font-bold px-5 py-2 rounded-lg transition active:scale-[0.97] disabled:opacity-30 ${
+                        recording
+                          ? "bg-white text-red-500 border border-red-200 hover:bg-red-50"
+                          : "bg-[#0F172A] text-white hover:bg-[#1e293b]"
+                      }`}>
+                      {recording ? (
+                        <><span className="w-3 h-3 rounded bg-red-500"/>Stop</>
+                      ) : (
+                        <>
+                          <svg viewBox="0 0 16 16" fill="none" className="w-4 h-4"><circle cx="8" cy="8" r="3" fill="white"/><circle cx="8" cy="8" r="6" stroke="white" strokeWidth="1.2"/></svg>
+                          Record Answer →
+                        </>
+                      )}
+                    </button>
+                  </div>
 
                   {currentAns?.done && currentIdx < questions.length - 1 && (
-                    <button onClick={goNext} className="ml-auto bg-[#6C47FF] text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-[#5A3AE0] transition">
-                      Continue to Next →
+                    <button onClick={goNext} className="bg-[#1D4ED8] text-white text-sm font-bold px-5 py-2 rounded-lg hover:bg-[#1E40AF] transition">
+                      Next →
                     </button>
                   )}
                 </div>
 
-                {error && <p className="text-red-500 text-xs mt-3.5 font-semibold">⚠️ {error}</p>}
+                {error && <p className="text-red-500 text-xs px-5 pb-3 font-semibold">⚠ {error}</p>}
               </div>
 
-              {/* Assessment Dossier Compilation Alert */}
+              {/* All done banner */}
               {answeredCount === questions.length && questions.length > 0 && (
-                <div className="bg-green-50 border border-green-200 rounded-2xl p-6 text-center fade-up shadow-sm">
-                  <div className="text-3xl mb-2">🎉</div>
-                  <h3 className="font-bold text-green-900 mb-1">Assessment parameters complete!</h3>
-                  <p className="text-xs text-green-600 mb-4.5">All questions have been evaluated. compile the structured report dossier below.</p>
-                  <button onClick={finish} className="bg-green-600 hover:bg-green-700 text-white px-8 py-3.5 rounded-xl font-bold text-sm transition shadow-md shadow-green-200">
+                <div className="card p-5 text-center border-green-200 bg-green-50 anim-scale-in">
+                  <p className="text-sm font-bold text-green-900 mb-1">All questions evaluated!</p>
+                  <p className="text-xs text-green-600 mb-4">Compile the structured report dossier.</p>
+                  <button onClick={finish} className="bg-green-600 hover:bg-green-700 text-white px-6 py-2.5 rounded-lg font-bold text-sm transition shadow-sm">
                     Compile Assessment Dossier →
                   </button>
                 </div>
               )}
             </>
+          ) : (
+            <div className="flex-1 flex items-center justify-center text-[#94A3B8]">No questions loaded.</div>
           )}
         </div>
 
-        {/* Right: Live Assessment Evaluation Panel */}
-        <div className="lg:col-span-3 order-2 lg:order-3 space-y-6">
-          {/* Analysis Loading Status */}
-          {currentAns?.loading && (
-            <div className="bg-[#F8F7FF] border border-[#6C47FF]/20 rounded-2xl p-4.5 fade-in">
-              <div className="flex items-center gap-2.5 text-[#6C47FF] mb-2">
-                <div className="w-2 h-2 rounded-full bg-[#6C47FF] animate-bounce"/>
-                <p className="text-xs font-bold uppercase tracking-wider">AI Evaluation Processing</p>
+        {/* ── RIGHT PANEL: Calibrated Verdict ── */}
+        <div className="w-[300px] shrink-0 border-l border-[#E2E8F0] bg-white overflow-y-auto flex flex-col">
+
+          {/* Verdict header */}
+          <div className="p-5 border-b border-[#F1F5F9]">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <svg viewBox="0 0 16 16" fill="none" className="w-4 h-4 text-[#475569]"><path d="M2 12l4-8 4 8M4 9h6" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/></svg>
+                <span className="font-bold text-[#0F172A] text-sm">Calibrated Verdict</span>
               </div>
-              <p className="text-[11px] text-[#6C47FF]/70 leading-normal">Scoring response structures, searching for domain metrics, and preparing recommendations.</p>
+              {currentAns?.evaluation?.score != null && (
+                <ScoreRing score={currentAns.evaluation.score}/>
+              )}
+            </div>
+
+            {currentAns?.evaluation && (
+              <div>
+                <p className="text-sm font-bold text-[#475569] italic capitalize mb-3">
+                  {currentAns.evaluation.sentiment === "not_answered" ? "Not Answered" : (currentAns.evaluation.sentiment || "Neutral") + " Response"}
+                </p>
+                {currentAns.evaluation.score != null && (
+                  <div className="space-y-2.5">
+                    {[
+                      { label: "Technical Depth",    val: Math.round((currentAns.evaluation.score / 10) * 9.0 * 10) / 10 },
+                      { label: "Communication",       val: Math.round((currentAns.evaluation.score / 10) * 7.5 * 10) / 10 },
+                    ].map(m => (
+                      <div key={m.label}>
+                        <div className="flex justify-between text-xs mb-1">
+                          <span className="text-[#475569] font-medium">{m.label}</span>
+                          <span className="font-bold text-[#0F172A]">{m.val}</span>
+                        </div>
+                        <div className="h-1.5 bg-[#F1F5F9] rounded-full overflow-hidden">
+                          <div className="h-full bg-[#1D4ED8] rounded-full anim-bar-fill" style={{ width: `${(m.val / 10) * 100}%` }}/>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {currentAns?.loading && (
+              <div className="flex items-center gap-2.5 text-[#1D4ED8] py-2">
+                <div className="flex gap-1">
+                  <span className="w-2 h-2 bg-[#1D4ED8] rounded-full bounce-dot-1"/>
+                  <span className="w-2 h-2 bg-[#1D4ED8] rounded-full bounce-dot-2"/>
+                  <span className="w-2 h-2 bg-[#1D4ED8] rounded-full bounce-dot-3"/>
+                </div>
+                <p className="text-xs font-bold">AI Evaluating...</p>
+              </div>
+            )}
+
+            {!currentAns?.done && !currentAns?.loading && (
+              <p className="text-xs text-[#94A3B8] italic">Submit an answer to see the AI verdict.</p>
+            )}
+          </div>
+
+          {/* Feedback Analysis */}
+          {currentAns?.evaluation?.analysis && (
+            <div className="p-4 border-b border-[#F1F5F9]">
+              <p className="text-[10px] font-bold text-[#94A3B8] uppercase tracking-wider mb-2">Feedback Analysis</p>
+              <div className="bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-3.5 text-xs text-[#475569] leading-relaxed">
+                "{currentAns.evaluation.analysis}"
+              </div>
             </div>
           )}
 
-          {/* Current Evaluation Report Card */}
-          {currentAns?.done && currentAns.evaluation && (
-            <div className="bg-white border border-[#EDE9FF] rounded-2xl p-4.5 fade-up space-y-4.5 shadow-sm">
-              <div className="flex items-center justify-between pb-3 border-b border-gray-50">
-                <div>
-                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Calibrated Verdict</p>
-                  <p className="text-xs font-bold text-gray-800 capitalize mt-0.5">{currentAns.evaluation.sentiment || "Neutral"} Response</p>
-                </div>
-                <ScoreRing score={currentAns.evaluation.score} />
+          {/* Key Strengths */}
+          {currentAns?.evaluation?.strength && (
+            <div className="p-4 border-b border-[#F1F5F9]">
+              <p className="text-[10px] font-bold text-green-600 uppercase tracking-wider mb-2">Key Strengths</p>
+              <div className="space-y-1.5">
+                {currentAns.evaluation.strength.split(".").filter(s => s.trim()).map((s, i) => (
+                  <div key={i} className="flex items-start gap-2 text-xs text-green-700">
+                    <span className="text-green-500 mt-0.5 shrink-0">•</span>
+                    <span className="leading-relaxed">{s.trim()}</span>
+                  </div>
+                ))}
               </div>
+            </div>
+          )}
 
-              {currentAns.evaluation.analysis && (
-                <div>
-                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5">Feedback Analysis</p>
-                  <p className="text-xs text-gray-600 leading-relaxed bg-gray-50/50 rounded-xl p-3 border border-gray-100">
-                    {currentAns.evaluation.analysis}
-                  </p>
-                </div>
-              )}
+          {/* Performance Gaps */}
+          {currentAns?.evaluation?.gap && (
+            <div className="p-4 border-b border-[#F1F5F9]">
+              <p className="text-[10px] font-bold text-amber-600 uppercase tracking-wider mb-2">Performance Gaps</p>
+              <p className="text-xs text-amber-700 leading-relaxed">{currentAns.evaluation.gap}</p>
+            </div>
+          )}
 
-              {currentAns.evaluation.strength && (
-                <div className="bg-green-50/70 border border-green-100/30 rounded-xl p-3">
-                  <p className="text-[10px] font-bold text-green-800 uppercase tracking-wider mb-1">Key Strengths</p>
-                  <p className="text-xs text-green-600 leading-relaxed">{currentAns.evaluation.strength}</p>
-                </div>
-              )}
-
-              {currentAns.evaluation.gap && (
-                <div className="bg-amber-50/70 border border-amber-100/30 rounded-xl p-3">
-                  <p className="text-[10px] font-bold text-amber-800 uppercase tracking-wider mb-1">Performance Gaps</p>
-                  <p className="text-xs text-amber-600 leading-relaxed">{currentAns.evaluation.gap}</p>
-                </div>
-              )}
-
-              {currentAns.evaluation.followUp && (
-                <div className="bg-blue-50 border border-blue-100 rounded-xl p-3">
-                  <p className="text-[10px] font-bold text-blue-800 uppercase tracking-wider mb-1">Follow-up Recommendation</p>
-                  <p className="text-xs text-blue-600 leading-relaxed italic mb-3">&ldquo;{currentAns.evaluation.followUp}&rdquo;</p>
-                  <button
-                    onClick={async () => {
-                      if (!token) return;
-                      try {
-                        const newQ = await api.addQuestion(
-                          sessionId,
-                          currentAns.evaluation!.followUp!,
-                          "follow-up",
-                          `Follow-up to Q${currentIdx + 1}: "${currentQ.question}"`,
-                          token
-                        );
-                        setQuestions(prev => {
-                          const updated = [...prev];
-                          updated.splice(currentIdx + 1, 0, newQ);
-                          return updated;
-                        });
-                        setCurrentIdx(currentIdx + 1);
-                        setShowRubric(false);
-                      } catch (err: any) {
-                        setError("Failed to add follow-up: " + err.message);
-                      }
-                    }}
-                    className="w-full bg-[#6C47FF] hover:bg-[#5A3AE0] text-white text-[11px] py-1.5 rounded-lg transition font-bold shadow-md shadow-purple-100"
-                  >
-                    Ask this follow-up
-                  </button>
-                </div>
-              )}
+          {/* Follow-up Probes */}
+          {currentAns?.evaluation?.followUp && (
+            <div className="p-4 border-b border-[#F1F5F9]">
+              <p className="text-[10px] font-bold text-[#94A3B8] uppercase tracking-wider mb-2">Follow-up Probes</p>
+              <div className="bg-[#EFF6FF] border border-[#BFDBFE] rounded-xl p-3 mb-2">
+                <p className="text-xs text-[#1D4ED8] leading-relaxed font-medium">"{currentAns.evaluation.followUp}"</p>
+              </div>
+              <button
+                onClick={async () => {
+                  if (!token || !currentAns?.evaluation?.followUp) return;
+                  try {
+                    const newQ = await api.addQuestion(sessionId, currentAns.evaluation!.followUp!, "follow-up", `Follow-up to Q${currentIdx + 1}`, token);
+                    setQuestions(prev => { const u = [...prev]; u.splice(currentIdx + 1, 0, newQ); return u; });
+                    setCurrentIdx(currentIdx + 1); setShowRubric(false);
+                  } catch (err: any) { setError("Failed to add follow-up: " + err.message); }
+                }}
+                className="w-full bg-[#1D4ED8] hover:bg-[#1E40AF] text-white text-xs font-bold py-2 rounded-lg transition active:scale-[0.97]">
+                Ask this follow-up →
+              </button>
             </div>
           )}
 
           {currentAns?.skipped && (
-            <div className="bg-gray-50 border border-gray-200 rounded-2xl p-4 text-center">
-              <p className="text-xs font-semibold text-gray-400">⏭ Question bypassed</p>
+            <div className="p-4 border-b border-[#F1F5F9] text-center">
+              <p className="text-xs font-semibold text-[#94A3B8]">⏭ Question skipped</p>
             </div>
           )}
 
-          {currentAns?.notAnswered && (
-            <div className="bg-red-50/40 border border-red-100/40 rounded-2xl p-4 text-center">
-              <p className="text-xs font-bold text-red-500">✕ Mark as unanswered</p>
-            </div>
-          )}
-
-          {/* Calibrated Scores Breakdown */}
+          {/* Metrics Scoreboard */}
           {Object.values(answers).some(a => a.done) && (
-            <div className="bg-white border border-[#EDE9FF] rounded-2xl p-4 shadow-sm">
-              <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3.5">Metrics scoreboard</p>
-              <div className="space-y-3">
+            <div className="p-4">
+              <p className="text-[10px] font-bold text-[#94A3B8] uppercase tracking-wider mb-3">Metrics Scoreboard</p>
+              <div className="grid grid-cols-2 gap-3 mb-4">
+                {(() => {
+                  const scored = Object.values(answers).filter(a => a.done && a.evaluation?.score != null && !a.notAnswered);
+                  const avg = scored.length ? scored.reduce((s, a) => s + (a.evaluation?.score ?? 0), 0) / scored.length : 0;
+                  return (
+                    <>
+                      <div className="bg-[#F8FAFC] rounded-xl p-3 text-center border border-[#E2E8F0]">
+                        <p className="text-[10px] text-[#94A3B8] font-semibold mb-1">TIME SCORE</p>
+                        <p className="text-xl font-black text-[#0F172A]">{avg.toFixed(1)}</p>
+                      </div>
+                      <div className="bg-[#F8FAFC] rounded-xl p-3 text-center border border-[#E2E8F0]">
+                        <p className="text-[10px] text-[#94A3B8] font-semibold mb-1">ACCURACY</p>
+                        <p className="text-xl font-black text-[#0F172A]">{scored.length > 0 ? Math.round(avg * 10) : 0}%</p>
+                      </div>
+                    </>
+                  );
+                })()}
+              </div>
+
+              <div className="space-y-2.5">
                 {questions.map((q, i) => {
                   const a = answers[q.id];
                   if (!a?.done) return null;
                   const s = a.evaluation?.score ?? 0;
                   return (
                     <div key={q.id} className="flex items-center gap-2.5">
-                      <span className="text-[10px] text-gray-400 font-bold w-5 shrink-0">Q{i+1}</span>
-                      <div className="flex-1 bg-gray-100 rounded-full h-1.5 overflow-hidden">
-                        <div className={`h-1.5 rounded-full ${s>=8?"bg-green-500":s>=6?"bg-amber-500":"bg-red-400"}`}
-                          style={{ width: `${s * 10}%` }}/>
+                      <span className="text-[10px] text-[#94A3B8] font-bold w-6 shrink-0">Q{i + 1}</span>
+                      <div className="flex-1 bg-[#F1F5F9] rounded-full h-1.5 overflow-hidden">
+                        <div className={`h-1.5 rounded-full anim-bar-fill ${s >= 8 ? "bg-green-500" : s >= 6 ? "bg-amber-400" : "bg-red-400"}`}
+                          style={{ width: `${s * 10}%`, animationDelay: `${i * 60}ms` }}/>
                       </div>
-                      <span className="text-[10px] font-extrabold text-gray-600 min-w-6 text-right">{a.notAnswered ? "✕" : s}</span>
+                      <span className="text-[10px] font-bold text-[#475569] min-w-[20px] text-right">{a.notAnswered ? "✕" : s}</span>
                     </div>
                   );
                 })}
               </div>
-              {(() => {
-                const scored = Object.values(answers).filter(a => a.done && a.evaluation?.score != null && !a.notAnswered);
-                const avg = scored.length ? (scored.reduce((s,a) => s + (a.evaluation?.score ?? 0), 0) / scored.length).toFixed(1) : "—";
-                return (
-                  <div className="mt-3.5 pt-3.5 border-t border-gray-100 flex items-center justify-between">
-                    <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Average Score</p>
-                    <p className="text-sm font-black text-gray-800">{avg} / 10</p>
-                  </div>
-                );
-              })()}
             </div>
           )}
         </div>

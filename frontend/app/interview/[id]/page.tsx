@@ -7,7 +7,7 @@ import { api } from "@/lib/api";
 
 type Q = { id: number; question: string; category: string; rubric: string; timeGuide?: string };
 type Eval = { score: number | null; strength: string | null; gap: string | null; followUp: string | null; sentiment: string; analysis?: string };
-type AnswerState = { transcript: string; evaluation: Eval | null; loading: boolean; done: boolean; skipped: boolean; notAnswered?: boolean };
+type AnswerState = { transcript: string; evaluation: Eval | null; loading: boolean; done: boolean; skipped: boolean; notAnswered?: boolean; notes?: string };
 
 const CAT_STYLE: Record<string, string> = {
   behavioral: "bg-blue-100 text-blue-700",
@@ -16,6 +16,7 @@ const CAT_STYLE: Record<string, string> = {
   technical: "bg-orange-100 text-orange-700",
   culture: "bg-pink-100 text-pink-700",
   leadership: "bg-indigo-100 text-indigo-700",
+  "follow-up": "bg-cyan-100 text-cyan-700",
 };
 
 function ScoreRing({ score }: { score: number | null }) {
@@ -65,7 +66,35 @@ export default function InterviewPage() {
   useEffect(() => {
     if (!token) return;
     Promise.all([api.getSession(sessionId, token), api.getQuestions(sessionId, token)])
-      .then(([s, q]) => { setSessionData(s); setQuestions(q.questions || []); })
+      .then(([s, q]) => {
+        setSessionData(s);
+        setQuestions(q.questions || []);
+        
+        // Populate answers from session data
+        if (s.answers && Array.isArray(s.answers)) {
+          const ansMap: Record<number, AnswerState> = {};
+          s.answers.forEach((a: any) => {
+            const isNotAnswered = a.sentiment === 'not_answered' || a.score === 0;
+            ansMap[a.question_id] = {
+              transcript: a.transcript || "",
+              evaluation: {
+                score: a.score,
+                strength: a.strength,
+                gap: a.gap,
+                followUp: a.followUp,
+                sentiment: a.sentiment,
+                analysis: a.analysis
+              },
+              loading: false,
+              done: !a.skipped,
+              skipped: a.skipped,
+              notAnswered: isNotAnswered,
+              notes: a.manual_notes || ""
+            };
+          });
+          setAnswers(ansMap);
+        }
+      })
       .catch(e => setError(e.message))
       .finally(() => setLoading(false));
   }, [sessionId, token]);
@@ -74,6 +103,18 @@ export default function InterviewPage() {
     timerRef.current = setInterval(() => setElapsed(e => e + 1), 1000);
     return () => clearInterval(timerRef.current);
   }, []);
+
+  // Sync editTranscript and notes when currentQ changes
+  useEffect(() => {
+    if (currentQ) {
+      const ans = answers[currentQ.id];
+      setEditTranscript(ans?.transcript || "");
+      setNotes(ans?.notes || "");
+    } else {
+      setEditTranscript("");
+      setNotes("");
+    }
+  }, [currentQ?.id]);
 
   const fmt = (s: number) => `${Math.floor(s/60)}:${String(s%60).padStart(2,"0")}`;
 
@@ -97,13 +138,13 @@ export default function InterviewPage() {
   const evaluate = async (notAnswered = false) => {
     if (!currentQ) return;
     const qId = currentQ.id;
-    setAnswers(p => ({ ...p, [qId]: { transcript: editTranscript, evaluation: null, loading: true, done: false, skipped: false, notAnswered } }));
+    setAnswers(p => ({ ...p, [qId]: { transcript: editTranscript, evaluation: null, loading: true, done: false, skipped: false, notAnswered, notes } }));
     try {
       const ev = await api.evaluateAnswer(sessionId, qId, editTranscript, notes, notAnswered, token);
-      setAnswers(p => ({ ...p, [qId]: { transcript: editTranscript, evaluation: ev, loading: false, done: true, skipped: false, notAnswered } }));
-      setLiveTranscript(""); setEditTranscript(""); setNotes(""); setShowNotes(false); setShowRubric(false);
+      setAnswers(p => ({ ...p, [qId]: { transcript: editTranscript, evaluation: ev, loading: false, done: true, skipped: false, notAnswered, notes } }));
+      setShowNotes(false); setShowRubric(false);
     } catch (e: any) {
-      setAnswers(p => ({ ...p, [qId]: { transcript: editTranscript, evaluation: null, loading: false, done: false, skipped: false } }));
+      setAnswers(p => ({ ...p, [qId]: { transcript: editTranscript, evaluation: null, loading: false, done: false, skipped: false, notes } }));
       setError(e.message);
     }
   };
@@ -116,8 +157,8 @@ export default function InterviewPage() {
     if (currentIdx < questions.length - 1) setCurrentIdx(i => i + 1);
   };
 
-  const goNext = () => { if (currentIdx < questions.length-1) { setCurrentIdx(i=>i+1); setLiveTranscript(""); setEditTranscript(""); setShowRubric(false); } };
-  const goPrev = () => { if (currentIdx > 0) { setCurrentIdx(i=>i-1); setLiveTranscript(""); setEditTranscript(""); setShowRubric(false); } };
+  const goNext = () => { if (currentIdx < questions.length-1) { setCurrentIdx(i=>i+1); setShowRubric(false); } };
+  const goPrev = () => { if (currentIdx > 0) { setCurrentIdx(i=>i-1); setShowRubric(false); } };
 
   const finish = async () => {
     setFinishing(true);
@@ -262,8 +303,11 @@ export default function InterviewPage() {
                   )}
                   <textarea value={editTranscript} onChange={e => setEditTranscript(e.target.value)} rows={5}
                     placeholder={recording ? "Listening... candidate's words will appear here" : "Record candidate's answer, or type/paste it manually..."}
+                    disabled={!!(currentAns?.done || currentAns?.skipped || currentAns?.notAnswered || currentAns?.loading)}
                     className={`w-full border rounded-xl px-4 py-3 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-[#6C47FF] transition leading-relaxed ${
-                      recording ? "border-red-300 bg-red-50/50" : "border-gray-200 bg-gray-50 hover:bg-white"
+                      recording ? "border-red-300 bg-red-50/50" :
+                      (currentAns?.done || currentAns?.skipped || currentAns?.notAnswered) ? "border-gray-200 bg-gray-100/70 text-gray-600" :
+                      "border-gray-200 bg-gray-50 hover:bg-white"
                     }`}/>
                 </div>
 
@@ -368,7 +412,33 @@ export default function InterviewPage() {
               {currentAns.evaluation.followUp && (
                 <div className="bg-blue-50 border border-blue-100 rounded-xl px-3 py-2.5">
                   <p className="text-xs font-semibold text-blue-700 mb-1">💡 Ask this follow-up</p>
-                  <p className="text-xs text-blue-600 leading-relaxed italic">&ldquo;{currentAns.evaluation.followUp}&rdquo;</p>
+                  <p className="text-xs text-blue-600 leading-relaxed italic mb-2.5">&ldquo;{currentAns.evaluation.followUp}&rdquo;</p>
+                  <button
+                    onClick={async () => {
+                      if (!token) return;
+                      try {
+                        const newQ = await api.addQuestion(
+                          sessionId,
+                          currentAns.evaluation!.followUp!,
+                          "follow-up",
+                          `Follow-up to Q${currentIdx + 1}: "${currentQ.question}"`,
+                          token
+                        );
+                        setQuestions(prev => {
+                          const updated = [...prev];
+                          updated.splice(currentIdx + 1, 0, newQ);
+                          return updated;
+                        });
+                        setCurrentIdx(currentIdx + 1);
+                        setShowRubric(false);
+                      } catch (err: any) {
+                        setError("Failed to add follow-up: " + err.message);
+                      }
+                    }}
+                    className="w-full bg-[#6C47FF] hover:bg-[#5A3AE0] text-white text-xs py-1.5 rounded-lg transition font-semibold"
+                  >
+                    Ask this follow-up
+                  </button>
                 </div>
               )}
 

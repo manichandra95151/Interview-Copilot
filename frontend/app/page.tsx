@@ -25,7 +25,16 @@ const testimonials = [
 ];
 
 export default async function HomePage() {
-  const session = await getServerSession(authOptions);
+  const isAuthEnabled = process.env.isAuth === 'true' || process.env.IS_AUTH === 'true';
+  const session = isAuthEnabled
+    ? await getServerSession(authOptions)
+    : {
+        user: {
+          name: "Mock User",
+          email: "mock-user@example.com",
+          image: "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y"
+        }
+      };
 
   return (
     <div className="min-h-screen bg-white">

@@ -68,6 +68,38 @@ export async function saveQuestions(sessionId, questions) {
   return _getQuestions(sessionId);
 }
 
+export async function addQuestion(sessionId, questionData) {
+  const { data: countData, error: countErr } = await supabase
+    .from('questions')
+    .select('question_idx')
+    .eq('session_id', sessionId);
+  if (countErr) throw new Error('DB addQuestion count: ' + countErr.message);
+
+  const nextIdx = (countData || []).length + 1;
+
+  const { data, error } = await supabase
+    .from('questions')
+    .insert({
+      session_id: sessionId,
+      question_idx: nextIdx,
+      question: questionData.question,
+      category: questionData.category || 'follow-up',
+      rubric: questionData.rubric || 'Follow-up question',
+      time_guide: questionData.timeGuide || null,
+    })
+    .select()
+    .single();
+
+  if (error) throw new Error('DB addQuestion insert: ' + error.message);
+  return {
+    id: data.question_idx,
+    question: data.question,
+    category: data.category,
+    rubric: data.rubric,
+    timeGuide: data.time_guide,
+  };
+}
+
 export async function saveAnswer(sessionId, questionId, answerData) {
   const { error } = await supabase.from('answers').upsert(
     {

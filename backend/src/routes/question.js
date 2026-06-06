@@ -1,10 +1,27 @@
 import express from 'express';
-import { getSession, saveQuestions } from '../services/store.js';
+import { getSession, saveQuestions, addQuestion } from '../services/store.js';
 import { generateQuestionsLLM } from '../services/llm.js';
 import { requireAuth } from '../middleware/auth.js';
 
 const router = express.Router();
 router.use(requireAuth);
+
+// POST /api/questions/add
+router.post('/add', async (req, res) => {
+  try {
+    const { sessionId, question, category, rubric, timeGuide } = req.body;
+    if (!sessionId || !question) return res.status(400).json({ error: 'sessionId and question text required' });
+
+    const session = await getSession(sessionId);
+    if (session.userId !== req.userId) return res.status(403).json({ error: 'Forbidden' });
+
+    const newQuestion = await addQuestion(sessionId, { question, category, rubric, timeGuide });
+    res.json(newQuestion);
+  } catch (err) {
+    console.error('Add question error:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
 
 // POST /api/questions/generate
 router.post('/generate', async (req, res) => {

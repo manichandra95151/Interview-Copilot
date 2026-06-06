@@ -36,4 +36,35 @@ export const authOptions: AuthOptions = {
 };
 
 const handler = NextAuth(authOptions);
-export { handler as GET, handler as POST };
+
+const customGetHandler = async (req: any, res: any) => {
+  const isAuthEnabled = process.env.isAuth === 'true' || process.env.IS_AUTH === 'true';
+  if (!isAuthEnabled) {
+    const url = new URL(req.url);
+    if (url.pathname.endsWith('/api/auth/session')) {
+      const mockToken = sign(
+        { sub: 'mock-user-id', email: 'mock-user@example.com' },
+        JWT_SECRET,
+        { expiresIn: "7d" }
+      );
+      return new Response(
+        JSON.stringify({
+          user: {
+            name: "Mock User",
+            email: "mock-user@example.com",
+            image: "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y"
+          },
+          expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+          _token: mockToken
+        }),
+        {
+          status: 200,
+          headers: { "Content-Type": "application/json" }
+        }
+      );
+    }
+  }
+  return handler(req, res);
+};
+
+export { customGetHandler as GET, handler as POST };

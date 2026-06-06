@@ -23,6 +23,9 @@ export const api = {
   generateQuestions: (sessionId: string, selectedCategories: string[], token: string) =>
     req<any>('/api/questions/generate', { method: 'POST', body: JSON.stringify({ sessionId, selectedCategories }) }, token),
 
+  addQuestion: (sessionId: string, question: string, category: string, rubric: string, token: string) =>
+    req<any>('/api/questions/add', { method: 'POST', body: JSON.stringify({ sessionId, question, category, rubric }) }, token),
+
   getQuestions: (sessionId: string, token: string) => req<any>(`/api/questions/${sessionId}`, {}, token),
 
   evaluateAnswer: (sessionId: string, questionId: number, transcript: string, manualNotes: string, notAnswered: boolean, token: string) =>

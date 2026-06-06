@@ -16,7 +16,7 @@ type Report = {
   competencies: Record<string, number>;
 };
 
-function VerdictBanner({ verdict, score }: { verdict, score }) {
+function VerdictBanner({ verdict, score }: { verdict: string; score: number }) {
   const map: Record<string, { label: string; icon: string; cls: string; bg: string; textCls: string }> = {
     recommend_hire: { label: "Recommend Hire", icon: "✓", cls: "bg-green-600", bg: "bg-green-50/50 border-green-200/50", textCls: "text-green-800" },
     consider: { label: "Consider Profiles", icon: "•", cls: "bg-amber-500", bg: "bg-amber-50/50 border-amber-200/50", textCls: "text-amber-800" },

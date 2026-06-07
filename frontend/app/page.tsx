@@ -10,7 +10,7 @@ const features = [
       </svg>
     ),
     title: "Workspace Configuration",
-    desc: "Upload resumes and job parameters. Our AI generates 10 structured rubrics and tailored questions mapped to specific competencies like Behavioral and Technical skills.",
+    desc: "Upload resumes and job parameters. Our AI generates 10 structured rubrics and tailored questions mapped to competencies like Behavioral and Technical.",
   },
   {
     icon: (
@@ -28,49 +28,71 @@ const features = [
       </svg>
     ),
     title: "Calibrated Verdicts",
-    desc: "Receive objective scores and detailed feedback analysis highlighting key strengths and performance gaps for every candidate response.",
+    desc: "Receive objective scores and detailed feedback highlighting key strengths and performance gaps for every candidate response.",
+  },
+  {
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-6 h-6">
+        <path d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" strokeLinecap="round" strokeLinejoin="round"/>
+      </svg>
+    ),
+    title: "Instant Panel Sharing",
+    desc: "Generate secure, shareable public links in one click. Keep your hiring panel and HR teams aligned before the debrief.",
+  },
+  {
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-6 h-6">
+        <path d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" strokeLinecap="round" strokeLinejoin="round"/>
+      </svg>
+    ),
+    title: "Multi-category Filtering",
+    desc: "Target the competencies that matter most: behavioral, situational, domain experience, functional, culture fit, or leadership.",
+  },
+  {
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-6 h-6">
+        <path d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" strokeLinecap="round" strokeLinejoin="round"/>
+      </svg>
+    ),
+    title: "Bypassed Question Detection",
+    desc: "Unanswered or skipped questions are automatically flagged, ensuring crucial performance details never slip by unnoticed.",
   },
 ];
 
 const steps = [
-  { n: "01", title: "Input Criteria",       desc: "Upload candidate's resume and paste the job description to define role parameters." },
-  { n: "02", title: "Review Calibration",   desc: "The platform generates 10 tailored questions mapped to specific candidate rubrics." },
-  { n: "03", title: "Conduct Live Session", desc: "Present questions one by one, record responses, and view real-time scores." },
-  { n: "04", title: "Share Assessment",     desc: "Publish and share the final structured evaluation report with the hiring team." },
+  { n: "01", title: "Input Criteria",        desc: "Upload the candidate's resume and paste the job description." },
+  { n: "02", title: "Review Calibration",    desc: "AI generates 10 tailored questions mapped to specific rubrics." },
+  { n: "03", title: "Conduct Live Session",  desc: "Present questions, record live responses, view instant scores." },
+  { n: "04", title: "Share Assessment",      desc: "Publish and share the final evaluation report with the hiring team." },
 ];
 
 export default function HomePage() {
   const { data: session } = useSession();
 
   return (
-    <div className="min-h-screen bg-[#F1F5F9] font-[Inter,system-ui,sans-serif]">
+    <div className="min-h-screen bg-[#F8F7FF] selection:bg-[#6C47FF]/20 selection:text-[#6C47FF]">
 
       {/* ── NAV ── */}
-      <nav className="fixed top-0 w-full z-50 bg-white border-b border-[#E2E8F0]">
-        <div className="max-w-6xl mx-auto px-6 flex items-center justify-between h-14">
+      <nav className="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-xl border-b border-[#EDE9FF]/80">
+        <div className="max-w-6xl mx-auto px-5 flex items-center justify-between h-14">
           <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-lg bg-[#1D4ED8] flex items-center justify-center">
-              <svg viewBox="0 0 16 16" fill="none" className="w-4 h-4">
-                <circle cx="8" cy="8" r="6" stroke="white" strokeWidth="1.5"/>
-                <path d="M5 8h6M8 5v6" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
-              </svg>
-            </div>
-            <span className="font-bold text-[#0F172A] text-[15px] tracking-tight">CopilotHire</span>
+            <div className="w-8 h-8 rounded-xl brand-gradient flex items-center justify-center text-white font-black text-sm shadow-md shadow-purple-200/60">C</div>
+            <span className="font-bold text-gray-900 tracking-tight text-[15px]">CopilotHire</span>
           </div>
-          <div className="hidden md:flex items-center gap-8 text-[13px] font-medium text-[#475569]">
-            <a href="#features" className="hover:text-[#0F172A] transition-colors">Features</a>
-            <a href="#how-it-works" className="hover:text-[#0F172A] transition-colors">About</a>
+          <div className="hidden md:flex items-center gap-7 text-[13px] font-medium text-gray-500">
+            <a href="#features"    className="hover:text-gray-900 transition-colors">Features</a>
+            <a href="#how-it-works" className="hover:text-gray-900 transition-colors">About</a>
           </div>
           <div className="flex items-center gap-3">
             {session ? (
-              <Link href="/dashboard" className="text-sm font-semibold text-[#1D4ED8] hover:text-[#1E40AF] transition">
+              <Link href="/dashboard" className="bg-[#6C47FF] text-white text-sm font-semibold px-4 py-2 rounded-xl hover:bg-[#5A3AE0] transition shadow-lg shadow-purple-200/50">
                 Dashboard →
               </Link>
             ) : (
               <>
-                <Link href="/api/auth/signin" className="text-sm font-medium text-[#475569] hover:text-[#0F172A] transition">Sign in</Link>
-                <Link href="/api/auth/signin" className="bg-[#1D4ED8] text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-[#1E40AF] transition">
-                  Get started
+                <Link href="/api/auth/signin" className="text-sm font-semibold text-gray-500 hover:text-gray-900 transition">Sign in</Link>
+                <Link href="/api/auth/signin" className="bg-[#6C47FF] text-white text-sm font-semibold px-4 py-2 rounded-xl hover:bg-[#5A3AE0] transition shadow-lg shadow-purple-200/50">
+                  Start Free
                 </Link>
               </>
             )}
@@ -79,87 +101,91 @@ export default function HomePage() {
       </nav>
 
       {/* ── HERO ── */}
-      <section className="pt-28 pb-20 px-6 bg-[#F8FAFC]">
-        <div className="max-w-4xl mx-auto text-center">
-          <div className="hero-badge mb-6 anim-fade-up">
-            <span className="w-1.5 h-1.5 bg-[#1D4ED8] rounded-full dot-blink"/>
+      <section className="hero-bg pt-28 pb-20 px-5 relative overflow-hidden">
+        {/* Decorative blobs */}
+        <div className="absolute top-20 left-[5%] w-72 h-72 bg-purple-200/30 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute top-40 right-[5%] w-56 h-56 bg-pink-200/20 rounded-full blur-3xl pointer-events-none" />
+
+        <div className="max-w-5xl mx-auto text-center relative z-10">
+          <div className="inline-flex items-center gap-2 bg-white/80 border border-[#EDE9FF] text-[#6C47FF] text-[11px] font-bold px-4 py-1.5 rounded-full mb-7 tracking-widest uppercase shadow-sm fade-up">
+            <span className="relative flex w-2 h-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#6C47FF] opacity-50" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-[#6C47FF]" />
+            </span>
             Professional Interview Intelligence
           </div>
 
-          <h1 className="text-5xl sm:text-6xl font-extrabold text-[#0F172A] leading-[1.1] tracking-tight mb-5 anim-fade-up-1">
-            Configure your workspace.<br/>
-            <span className="text-[#1D4ED8]">Master the live interview.</span>
+          <h1 className="text-5xl sm:text-[64px] font-extrabold text-gray-900 leading-[1.08] mb-5 tracking-tight fade-up-1">
+            Configure your workspace.<br />
+            <span className="gradient-text">Master the live interview.</span>
           </h1>
 
-          <p className="text-[17px] text-[#475569] max-w-2xl mx-auto leading-relaxed mb-8 anim-fade-up-2">
-            Provide role context, candidate resumes, and configure target evaluation criteria. Then, conduct live sessions with real-time AI scoring and behavioral analysis.
+          <p className="text-[17px] text-gray-500 max-w-2xl mx-auto mb-9 leading-relaxed fade-up-2">
+            Provide role context, candidate resumes, and configure target evaluation criteria.
+            Then, conduct live sessions with real-time AI scoring and behavioral analysis.
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-3 justify-center items-center anim-fade-up-3">
+          <div className="flex flex-col sm:flex-row gap-3 justify-center items-center fade-up-3">
             <Link href={session ? "/setup" : "/api/auth/signin"}
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-[#1D4ED8] hover:bg-[#1E40AF] text-white px-7 py-3.5 rounded-lg text-[15px] font-semibold transition-all active:scale-[0.98]">
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-[#6C47FF] text-white px-7 py-3.5 rounded-2xl text-[15px] font-bold hover:bg-[#5A3AE0] active:scale-[0.98] transition-all duration-200 shadow-xl shadow-purple-200/60">
               Start Free Session →
             </Link>
-            <Link href="/api/auth/signin"
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-white text-[#0F172A] px-7 py-3.5 rounded-lg text-[15px] font-semibold border border-[#E2E8F0] hover:bg-[#F8FAFC] transition-all">
+            <button className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-white text-gray-700 px-7 py-3.5 rounded-2xl text-[15px] font-bold border border-[#EDE9FF] hover:bg-gray-50 hover:border-[#D5CCFF] active:scale-[0.98] transition-all duration-200 shadow-sm">
+              <svg viewBox="0 0 20 20" fill="none" className="w-4 h-4 text-[#6C47FF]"><circle cx="10" cy="10" r="9" stroke="currentColor" strokeWidth="1.5"/><path d="M8 7l5 3-5 3V7z" fill="currentColor"/></svg>
               Watch Demo
-            </Link>
+            </button>
           </div>
         </div>
 
-        {/* Mockup preview */}
-        <div className="max-w-4xl mx-auto mt-14 anim-fade-up-4 anim-float">
-          <div className="bg-white rounded-2xl border border-[#E2E8F0] shadow-[0_8px_40px_rgba(15,23,42,0.10)] overflow-hidden">
+        {/* ── Hero Mockup ── */}
+        <div className="max-w-4xl mx-auto mt-14 px-2 relative z-10 float fade-up-4">
+          <div className="absolute -inset-2 rounded-3xl bg-gradient-to-br from-[#6C47FF]/20 via-purple-400/10 to-pink-400/10 blur-2xl" />
+          <div className="relative bg-white rounded-2xl border border-[#EDE9FF] shadow-[0_24px_64px_rgba(108,71,255,0.14)] overflow-hidden">
             {/* Window chrome */}
-            <div className="bg-[#F8FAFC] border-b border-[#E2E8F0] px-4 py-3 flex items-center gap-2">
+            <div className="bg-gray-50 border-b border-gray-100 px-4 py-2.5 flex items-center gap-2">
               <div className="flex gap-1.5">
-                <div className="w-3 h-3 rounded-full bg-[#FC635D]"/>
-                <div className="w-3 h-3 rounded-full bg-[#FDBC40]"/>
-                <div className="w-3 h-3 rounded-full bg-[#35CD4B]"/>
+                <div className="w-3 h-3 rounded-full bg-[#FC635D]"/><div className="w-3 h-3 rounded-full bg-[#FDBC40]"/><div className="w-3 h-3 rounded-full bg-[#35CD4B]"/>
               </div>
-              <span className="mx-auto text-[11px] text-[#94A3B8] font-mono">CopilotHire — Candidate Assessment Center</span>
+              <span className="mx-auto text-[11px] text-gray-400 font-mono">CopilotHire — Candidate Assessment Center</span>
             </div>
-            {/* Mock content */}
-            <div className="grid grid-cols-12 divide-x divide-[#F1F5F9]">
+            <div className="grid grid-cols-12 divide-x divide-gray-50 min-h-[180px]">
               {/* Sidebar */}
-              <div className="col-span-3 p-3 space-y-1.5">
-                {["Question 3", "Question 4", "Question 5"].map((q, i) => (
-                  <div key={i} className={`px-3 py-2 rounded-lg text-xs font-medium flex items-center gap-2 ${i===0?"bg-[#EFF6FF] text-[#1D4ED8]":"text-[#94A3B8]"}`}>
-                    {i===0 && <span className="w-1.5 h-1.5 bg-[#1D4ED8] rounded-full"/>}
-                    {q}
+              <div className="col-span-3 p-3 space-y-1">
+                {[{l:"Question 3",a:true},{l:"Question 4"},{l:"Question 5"}].map((q,i)=>(
+                  <div key={i} className={`px-2.5 py-2 rounded-lg text-xs font-medium flex items-center gap-2 ${q.a?"bg-[#EDE9FF] text-[#6C47FF]":"text-gray-400"}`}>
+                    {q.a && <span className="w-1.5 h-1.5 bg-[#6C47FF] rounded-full rec-pulse"/>}
+                    {q.l}
                   </div>
                 ))}
               </div>
               {/* Center */}
               <div className="col-span-5 p-4">
-                <span className="text-[10px] font-bold text-[#1D4ED8] bg-[#EFF6FF] px-2 py-0.5 rounded-full uppercase tracking-wide">Behavioral</span>
-                <p className="text-sm font-bold text-[#0F172A] mt-2.5 leading-snug">Tell me about a time you had to manage a project through unexpected scope changes.</p>
-                <div className="mt-3 bg-[#FEF2F2] border border-[#FECACA]/50 rounded-lg p-3">
-                  <div className="flex items-center gap-1.5 mb-1.5">
-                    <span className="w-1.5 h-1.5 bg-red-500 rounded-full dot-blink"/>
-                    <span className="text-[10px] font-bold text-red-500 uppercase tracking-wider">Live Transcription</span>
+                <span className="text-[9px] font-black text-[#6C47FF] bg-[#EDE9FF] px-2 py-0.5 rounded-full uppercase tracking-wider">Behavioral</span>
+                <p className="text-sm font-bold text-gray-900 mt-2 leading-snug">Tell me about a time you had to manage a project through unexpected scope changes.</p>
+                <div className="mt-3 bg-red-50/60 border border-red-100/60 rounded-xl p-2.5">
+                  <div className="flex items-center gap-1.5 mb-1">
+                    <span className="w-1.5 h-1.5 bg-red-500 rounded-full rec-pulse"/>
+                    <span className="text-[9px] font-bold text-red-500 uppercase tracking-wider">Live Transcription</span>
                   </div>
-                  <p className="text-xs text-[#475569] italic leading-relaxed">"We had a major infrastructure change mid-project. I immediately set up a stakeholder alignment session, documented the scope changes, and calibrated expectations..."</p>
+                  <p className="text-[11px] text-gray-600 italic leading-relaxed">"We had a major infrastructure change mid-project. I immediately set up a stakeholder alignment session, documented the scope changes, and calibrated expectations..."</p>
                 </div>
               </div>
-              {/* Right panel */}
-              <div className="col-span-4 p-4">
-                <div className="bg-[#EFF6FF] rounded-xl p-3 mb-3">
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="text-[11px] font-bold text-[#1D4ED8]">AI Verification</span>
-                    <span className="text-sm font-black text-[#1D4ED8]">8/10</span>
+              {/* Right */}
+              <div className="col-span-4 p-4 space-y-2.5">
+                <div className="bg-[#EDE9FF]/60 rounded-xl p-3">
+                  <div className="flex justify-between items-center mb-1.5">
+                    <span className="text-[10px] font-bold text-[#6C47FF]">AI Verification</span>
+                    <span className="text-sm font-black text-[#6C47FF]">8/10</span>
                   </div>
-                  <div className="h-1.5 bg-white rounded-full overflow-hidden">
-                    <div className="h-full bg-[#1D4ED8] rounded-full anim-bar-fill" style={{width:"80%"}}/>
+                  <div className="h-1.5 bg-white/80 rounded-full overflow-hidden">
+                    <div className="h-full bg-[#6C47FF] rounded-full fill-bar" style={{width:"80%"}}/>
                   </div>
                 </div>
-                <div className="space-y-2 text-[10px]">
-                  <div className="bg-[#F0FDF4] border border-[#BBF7D0]/50 rounded-lg p-2.5">
-                    <p className="font-bold text-green-800 mb-0.5">✓ Strong documentation of change controls</p>
-                  </div>
-                  <div className="bg-[#EFF6FF] border border-[#BFDBFE]/50 rounded-lg p-2.5">
-                    <p className="font-bold text-blue-800 mb-0.5">↗ Recommended: Follow up on stakeholder sync frequency</p>
-                  </div>
+                <div className="bg-green-50 border border-green-100 rounded-xl p-2.5 text-[10px]">
+                  <p className="font-bold text-green-700">✓ Strong documentation of change controls</p>
+                </div>
+                <div className="bg-blue-50 border border-blue-100 rounded-xl p-2.5 text-[10px]">
+                  <p className="font-bold text-blue-700">↗ Recommended: Follow up on stakeholder sync frequency</p>
                 </div>
               </div>
             </div>
@@ -168,20 +194,21 @@ export default function HomePage() {
       </section>
 
       {/* ── FEATURES ── */}
-      <section id="features" className="py-20 px-6 bg-white border-y border-[#E2E8F0]">
-        <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-extrabold text-[#0F172A] tracking-tight mb-3">Enterprise-grade capabilities, built for speed</h2>
-            <p className="text-[#475569] text-base">No complex configurations. Just an intuitive workspace to evaluate talent fairly and efficiently.</p>
+      <section id="features" className="py-20 px-5 bg-white border-y border-[#EDE9FF]/60">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-14">
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-900 tracking-tight mb-3">Enterprise-grade capabilities, built for speed</h2>
+            <p className="text-base text-gray-500 max-w-xl mx-auto">No complex configurations. Just an intuitive workspace to evaluate talent fairly and efficiently.</p>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {features.map((f, i) => (
-              <div key={i} className="card card-hover p-6" style={{animationDelay:`${i*80}ms`}}>
-                <div className="w-10 h-10 rounded-xl bg-[#EFF6FF] text-[#1D4ED8] flex items-center justify-center mb-4">
+              <div key={i} className="bg-[#F8F7FF] rounded-2xl p-6 border border-[#EDE9FF] card-lift step-enter"
+                style={{animationDelay:`${i*60}ms`}}>
+                <div className="w-10 h-10 rounded-xl bg-white border border-[#EDE9FF] text-[#6C47FF] flex items-center justify-center mb-4 shadow-sm">
                   {f.icon}
                 </div>
-                <h3 className="font-bold text-[#0F172A] text-[15px] mb-2">{f.title}</h3>
-                <p className="text-sm text-[#475569] leading-relaxed">{f.desc}</p>
+                <h3 className="font-bold text-gray-900 text-[15px] mb-2">{f.title}</h3>
+                <p className="text-sm text-gray-500 leading-relaxed">{f.desc}</p>
               </div>
             ))}
           </div>
@@ -189,37 +216,46 @@ export default function HomePage() {
       </section>
 
       {/* ── HOW IT WORKS ── */}
-      <section id="how-it-works" className="py-20 px-6 bg-[#F8FAFC]">
+      <section id="how-it-works" className="py-20 px-5 bg-[#F8F7FF] border-b border-[#EDE9FF]/60">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-14">
-            <h2 className="text-3xl font-extrabold text-[#0F172A] tracking-tight mb-3">Structured assessment methodology</h2>
-            <p className="text-[#475569] text-base">Our 4-step workflow ensures every hire is evaluated with consistent, bias-free standards.</p>
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-900 tracking-tight mb-3">Structured assessment methodology</h2>
+            <p className="text-base text-gray-500 max-w-xl mx-auto">Our 4-step workflow ensures every hire is evaluated with consistent, bias-free standards.</p>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 items-start">
-            {steps.map((s, i) => (
-              <div key={i} className="flex flex-col items-center text-center anim-fade-up" style={{animationDelay:`${i*90}ms`}}>
-                <div className="w-12 h-12 rounded-full bg-[#1D4ED8] flex items-center justify-center text-white font-black text-sm mb-4 shadow-[0_4px_16px_rgba(29,78,216,0.28)]">
-                  {s.n}
+
+          {/* Steps with connecting lines */}
+          <div className="relative">
+            {/* Desktop connector line */}
+            <div className="hidden md:block absolute top-6 left-[12.5%] right-[12.5%] h-0.5 bg-gradient-to-r from-[#6C47FF]/30 via-[#6C47FF]/60 to-[#6C47FF]/30 line-grow" style={{animationDelay:"0.2s"}}/>
+
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-4">
+              {steps.map((s, i) => (
+                <div key={i} className="flex flex-col items-center text-center step-enter" style={{animationDelay:`${i*90}ms`}}>
+                  <div className="relative w-12 h-12 rounded-full brand-gradient flex items-center justify-center text-white font-black text-sm mb-4 shadow-[0_6px_20px_rgba(108,71,255,0.35)] z-10">
+                    {s.n}
+                    {/* Ping ring on first */}
+                    {i === 0 && <div className="absolute inset-0 rounded-full bg-[#6C47FF]/20 animate-ping"/>}
+                  </div>
+                  <p className="font-bold text-gray-900 text-sm mb-1.5">{s.title}</p>
+                  <p className="text-xs text-gray-500 leading-relaxed max-w-[160px]">{s.desc}</p>
                 </div>
-                <p className="font-bold text-[#0F172A] text-sm mb-1.5">{s.title}</p>
-                <p className="text-xs text-[#475569] leading-relaxed">{s.desc}</p>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
       </section>
 
       {/* ── V2 MATCHMAKING ── */}
-      <section id="v2-spotlight" className="py-20 px-6 bg-white border-t border-[#E2E8F0]">
+      <section id="v2-spotlight" className="py-20 px-5 bg-white border-b border-[#EDE9FF]/60">
         <div className="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div>
-            <span className="inline-flex items-center gap-1.5 text-[12px] font-bold text-amber-600 bg-amber-50 border border-amber-200 rounded-full px-3 py-1 mb-5">
+            <span className="inline-flex items-center gap-1.5 text-[11px] font-bold text-amber-600 bg-amber-50 border border-amber-200 rounded-full px-3 py-1 mb-5">
               ✦ COMING SOON IN V2
             </span>
-            <h2 className="text-4xl font-extrabold text-[#0F172A] leading-tight tracking-tight mb-5">
+            <h2 className="text-4xl font-extrabold text-gray-900 leading-tight tracking-tight mb-5">
               Intelligent Candidate Matchmaking
             </h2>
-            <p className="text-[#475569] text-base leading-relaxed mb-8">
+            <p className="text-gray-500 text-base leading-relaxed mb-8">
               Recruiting isn't just about interviews—it's about finding the right starting point. We're launching a smart matchmaking system that maps your entire candidate pool directly to open roles using advanced semantic search.
             </p>
             <div className="space-y-4">
@@ -228,36 +264,34 @@ export default function HomePage() {
                 { title:"Evidence-Backed Recommendations", desc:"Using RAG (Retrieval-Augmented Generation), we highlight exactly why a candidate matches the role." },
               ].map((item, i) => (
                 <div key={i} className="flex items-start gap-3">
-                  <div className="w-5 h-5 rounded-full bg-[#EFF6FF] border border-[#BFDBFE] flex items-center justify-center shrink-0 mt-0.5">
-                    <svg viewBox="0 0 12 12" fill="none" className="w-3 h-3"><path d="M2 6l3 3 5-5" stroke="#1D4ED8" strokeWidth="1.5" strokeLinecap="round"/></svg>
+                  <div className="w-5 h-5 rounded-full bg-[#EDE9FF] border border-[#6C47FF]/20 flex items-center justify-center shrink-0 mt-0.5">
+                    <svg viewBox="0 0 12 12" fill="none" className="w-3 h-3"><path d="M2 6l3 3 5-5" stroke="#6C47FF" strokeWidth="1.8" strokeLinecap="round"/></svg>
                   </div>
                   <div>
-                    <p className="font-semibold text-[#0F172A] text-sm">{item.title}</p>
-                    <p className="text-xs text-[#475569] mt-0.5 leading-relaxed">{item.desc}</p>
+                    <p className="font-semibold text-gray-900 text-sm">{item.title}</p>
+                    <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">{item.desc}</p>
                   </div>
                 </div>
               ))}
             </div>
           </div>
           {/* Mock card */}
-          <div className="card p-6 shadow-[0_8px_32px_rgba(15,23,42,0.08)]">
-            <div className="bg-[#1D4ED8] rounded-xl p-4 mb-4 text-white flex items-center justify-between">
+          <div className="bg-white border border-[#EDE9FF] rounded-2xl p-6 shadow-[0_8px_40px_rgba(108,71,255,0.1)] card-lift">
+            <div className="brand-gradient rounded-xl p-4 mb-4 text-white flex items-center justify-between">
               <div>
                 <p className="font-bold text-sm">Senior Product Designer</p>
-                <p className="text-xs text-blue-200 mt-0.5">98% Match Probability</p>
+                <p className="text-xs text-purple-200 mt-0.5">98% Match Probability</p>
               </div>
-              <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
-                <svg viewBox="0 0 16 16" fill="none" className="w-4 h-4"><path d="M8 1l1.8 3.6L14 5.4l-3 2.9.7 4.1L8 10.5l-3.7 1.9.7-4.1-3-2.9 4.2-.8z" fill="white"/></svg>
-              </div>
+              <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-lg">✦</div>
             </div>
-            <div className="space-y-2.5">
-              {[85, 70, 92].map((w, i) => (
+            <div className="space-y-3">
+              {[{w:85,c:"bg-[#6C47FF]"},{w:70,c:"bg-purple-400"},{w:92,c:"bg-[#6C47FF]"}].map((b,i)=>(
                 <div key={i} className="flex items-center gap-3">
-                  <div className="w-6 h-6 rounded-full bg-[#F1F5F9] shrink-0"/>
-                  <div className="flex-1 h-2 bg-[#F1F5F9] rounded-full overflow-hidden">
-                    <div className="h-full bg-[#1D4ED8] rounded-full anim-bar-fill" style={{width:`${w}%`,animationDelay:`${i*100}ms`}}/>
+                  <div className="w-6 h-6 rounded-full bg-gray-100 shrink-0"/>
+                  <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
+                    <div className={`h-full ${b.c} rounded-full fill-bar`} style={{width:`${b.w}%`,animationDelay:`${i*100}ms`}}/>
                   </div>
-                  <span className="text-xs font-bold text-[#475569]">{w}%</span>
+                  <span className="text-xs font-bold text-gray-500">{b.w}%</span>
                 </div>
               ))}
             </div>
@@ -266,58 +300,48 @@ export default function HomePage() {
       </section>
 
       {/* ── CTA BANNER ── */}
-      <section className="py-16 px-6 bg-[#1D4ED8]">
+      <section className="py-16 px-5 brand-gradient">
         <div className="max-w-2xl mx-auto text-center">
-          <h2 className="text-3xl font-extrabold text-white mb-4">Want early access to V2 preview features?</h2>
-          <p className="text-blue-200 text-sm mb-8 leading-relaxed">
+          <h2 className="text-3xl font-extrabold text-white mb-4 tracking-tight">Want early access to V2 preview features?</h2>
+          <p className="text-purple-200 text-sm mb-8 leading-relaxed max-w-lg mx-auto">
             No signups required. Keep using your current sessions, and your dashboard will automatically unlock the pilot matching module soon.
           </p>
           <Link href={session ? "/setup" : "/api/auth/signin"}
-            className="inline-flex items-center gap-2 bg-white text-[#1D4ED8] px-8 py-3.5 rounded-lg text-[15px] font-bold hover:bg-blue-50 transition active:scale-[0.98]">
-            Get Started Free
+            className="inline-flex items-center gap-2 bg-white text-[#6C47FF] px-8 py-3.5 rounded-2xl text-[15px] font-black hover:bg-purple-50 active:scale-[0.98] transition-all shadow-lg">
+            Get Started Free →
           </Link>
         </div>
       </section>
 
       {/* ── FOOTER ── */}
-      <footer className="bg-white border-t border-[#E2E8F0] py-12 px-6">
-        <div className="max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-4 gap-8">
-          <div>
+      <footer className="bg-white border-t border-[#EDE9FF]/80 py-12 px-5">
+        <div className="max-w-6xl mx-auto grid grid-cols-2 sm:grid-cols-4 gap-8">
+          <div className="col-span-2 sm:col-span-1">
             <div className="flex items-center gap-2 mb-3">
-              <div className="w-6 h-6 rounded-md bg-[#1D4ED8] flex items-center justify-center">
-                <svg viewBox="0 0 16 16" fill="none" className="w-3.5 h-3.5"><circle cx="8" cy="8" r="6" stroke="white" strokeWidth="1.5"/><path d="M5 8h6M8 5v6" stroke="white" strokeWidth="1.5" strokeLinecap="round"/></svg>
+              <div className="w-7 h-7 rounded-lg brand-gradient flex items-center justify-center text-white text-xs font-black">C</div>
+              <span className="font-bold text-gray-900">CopilotHire</span>
+            </div>
+            <p className="text-xs text-gray-400 leading-relaxed max-w-[180px]">Elevating recruitment standards through AI-driven calibration and empathetic assessment tools.</p>
+          </div>
+          {[
+            { label: "Product",  links: ["Features", "Roadmap", "Pricing"] },
+            { label: "Company",  links: ["About", "Careers"] },
+            { label: "Legal",    links: ["Privacy", "Terms"] },
+          ].map(col => (
+            <div key={col.label}>
+              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-3">{col.label}</p>
+              <div className="space-y-2">
+                {col.links.map(l => <a key={l} href="#" className="block text-sm text-gray-500 hover:text-gray-900 transition">{l}</a>)}
               </div>
-              <span className="font-bold text-[#0F172A] text-sm">CopilotHire</span>
             </div>
-            <p className="text-xs text-[#475569] leading-relaxed">Elevating recruitment standards through AI-driven calibration and empathetic assessment tools.</p>
-          </div>
-          <div>
-            <p className="text-xs font-bold text-[#0F172A] uppercase tracking-wider mb-3">Product</p>
-            <div className="space-y-2">
-              {["Features","Roadmap","Pricing"].map(l=>(
-                <a key={l} href="#" className="block text-sm text-[#475569] hover:text-[#0F172A] transition">{l}</a>
-              ))}
-            </div>
-          </div>
-          <div>
-            <p className="text-xs font-bold text-[#0F172A] uppercase tracking-wider mb-3">Company</p>
-            <div className="space-y-2">
-              {["About","Careers"].map(l=>(
-                <a key={l} href="#" className="block text-sm text-[#475569] hover:text-[#0F172A] transition">{l}</a>
-              ))}
-            </div>
-          </div>
-          <div>
-            <p className="text-xs font-bold text-[#0F172A] uppercase tracking-wider mb-3">Legal</p>
-            <div className="space-y-2">
-              {["Privacy","Terms"].map(l=>(
-                <a key={l} href="#" className="block text-sm text-[#475569] hover:text-[#0F172A] transition">{l}</a>
-              ))}
-            </div>
-          </div>
+          ))}
         </div>
-        <div className="max-w-6xl mx-auto mt-10 pt-6 border-t border-[#F1F5F9]">
-          <p className="text-xs text-[#94A3B8]">© 2026 CopilotHire AI. All rights reserved.</p>
+        <div className="max-w-6xl mx-auto mt-10 pt-6 border-t border-gray-100 flex flex-col sm:flex-row justify-between items-center gap-3">
+          <p className="text-xs text-gray-400">© 2026 CopilotHire AI. All rights reserved.</p>
+          <div className="flex items-center gap-4 text-xs text-gray-400">
+            <a href="#" className="hover:text-gray-900 transition">Privacy</a>
+            <a href="#" className="hover:text-gray-900 transition">Terms</a>
+          </div>
         </div>
       </footer>
     </div>

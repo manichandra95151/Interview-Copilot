@@ -8,14 +8,15 @@ export async function createSession(id, data) {
     .from('sessions')
     .insert({
       id,
-      user_id:        data.userId,
-      candidate_name: data.candidate_name,
-      role:           data.role,
-      seniority:      data.seniority || 'Mid-level',
-      jd_text:        data.jd_text,
-      resume_text:    data.resume_text,
-      extra_context:  data.extra_context || '',
-      status:         'setup',
+      user_id:             data.userId,
+      candidate_name:      data.candidate_name,
+      role:                data.role,
+      seniority:           data.seniority || 'Mid-level',
+      jd_text:             data.jd_text,
+      resume_text:         data.resume_text,
+      extra_context:       data.extra_context || '',
+      custom_competencies: data.custom_competencies ? JSON.stringify(data.custom_competencies) : null,
+      status:              'setup',
     })
     .select()
     .single();
@@ -52,6 +53,23 @@ export async function generateShareToken(sessionId) {
   return token;
 }
 
+/**
+ * Save or update custom competencies on a session.
+ * Called from question.js /generate when customCompetencies are provided.
+ * @param {string} sessionId
+ * @param {Array<{id: string, name: string, description?: string}>} competencies
+ */
+export async function updateSessionCompetencies(sessionId, competencies) {
+  const { error } = await supabase
+    .from('sessions')
+    .update({
+      custom_competencies: JSON.stringify(competencies),
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', sessionId);
+  if (error) throw new Error('DB updateSessionCompetencies: ' + error.message);
+}
+
 export async function saveQuestions(sessionId, questions) {
   await supabase.from('questions').delete().eq('session_id', sessionId);
   const rows = questions.map((q, i) => ({
@@ -80,22 +98,22 @@ export async function addQuestion(sessionId, questionData) {
   const { data, error } = await supabase
     .from('questions')
     .insert({
-      session_id: sessionId,
+      session_id:   sessionId,
       question_idx: nextIdx,
-      question: questionData.question,
-      category: questionData.category || 'follow-up',
-      rubric: questionData.rubric || 'Follow-up question',
-      time_guide: questionData.timeGuide || null,
+      question:     questionData.question,
+      category:     questionData.category || 'follow-up',
+      rubric:       questionData.rubric || 'Follow-up question',
+      time_guide:   questionData.timeGuide || null,
     })
     .select()
     .single();
 
   if (error) throw new Error('DB addQuestion insert: ' + error.message);
   return {
-    id: data.question_idx,
-    question: data.question,
-    category: data.category,
-    rubric: data.rubric,
+    id:        data.question_idx,
+    question:  data.question,
+    category:  data.category,
+    rubric:    data.rubric,
     timeGuide: data.time_guide,
   };
 }
@@ -133,7 +151,7 @@ export async function saveReport(sessionId, report) {
       next_steps:    report.nextSteps,
       competencies:  report.competencies,
       // Store extra fields in competencies JSON for now
-      extra_data:    JSON.stringify({
+      extra_data: JSON.stringify({
         verdictReason:       report.verdictReason,
         answeredCount:       report.answeredCount,
         totalCount:          report.totalCount,
@@ -158,14 +176,14 @@ export async function getReport(sessionId) {
   let extra = {};
   try { extra = JSON.parse(data.extra_data || '{}'); } catch {}
   return {
-    overallScore:        data.overall_score,
-    verdict:             data.verdict,
-    summary:             data.summary,
-    strengths:           data.strengths,
-    gaps:                data.gaps,
-    redFlags:            data.red_flags,
-    nextSteps:           data.next_steps,
-    competencies:        data.competencies,
+    overallScore: data.overall_score,
+    verdict:      data.verdict,
+    summary:      data.summary,
+    strengths:    data.strengths,
+    gaps:         data.gaps,
+    redFlags:     data.red_flags,
+    nextSteps:    data.next_steps,
+    competencies: data.competencies,
     ...extra,
   };
 }
@@ -227,18 +245,31 @@ async function _getAnswers(sessionId) {
 }
 
 function _mapSession(row, questions, answers) {
+  // Parse custom_competencies safely — it's stored as JSON text in Postgres
+  let customCompetencies = [];
+  try {
+    if (row.custom_competencies) {
+      customCompetencies = typeof row.custom_competencies === 'string'
+        ? JSON.parse(row.custom_competencies)
+        : row.custom_competencies;
+    }
+  } catch {
+    customCompetencies = [];
+  }
+
   return {
-    id:             row.id,
-    userId:         row.user_id,
-    candidate_name: row.candidate_name,
-    role:           row.role,
-    seniority:      row.seniority,
-    jd_text:        row.jd_text,
-    resume_text:    row.resume_text,
-    extra_context:  row.extra_context,
-    status:         row.status,
-    shareToken:     row.share_token,
-    createdAt:      row.created_at,
+    id:                  row.id,
+    userId:              row.user_id,
+    candidate_name:      row.candidate_name,
+    role:                row.role,
+    seniority:           row.seniority,
+    jd_text:             row.jd_text,
+    resume_text:         row.resume_text,
+    extra_context:       row.extra_context,
+    status:              row.status,
+    shareToken:          row.share_token,
+    createdAt:           row.created_at,
+    custom_competencies: customCompetencies,  // always an array
     questions,
     answers,
   };

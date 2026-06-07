@@ -1,5 +1,5 @@
 import express from 'express';
-import { getSession, saveQuestions, addQuestion } from '../services/store.js';
+import { getSession, saveQuestions, addQuestion, updateSessionCompetencies } from '../services/store.js';
 import { generateQuestionsLLM } from '../services/llm.js';
 import { requireAuth } from '../middleware/auth.js';
 
@@ -26,11 +26,16 @@ router.post('/add', async (req, res) => {
 // POST /api/questions/generate
 router.post('/generate', async (req, res) => {
   try {
-    const { sessionId, selectedCategories } = req.body;
+    const { sessionId, selectedCategories, customCompetencies } = req.body;
     if (!sessionId) return res.status(400).json({ error: 'sessionId is required' });
 
     const session = await getSession(sessionId);
     if (session.userId !== req.userId) return res.status(403).json({ error: 'Forbidden' });
+
+    // Persist custom competencies on the session so the report can reference them later
+    if (customCompetencies && customCompetencies.length > 0) {
+      await updateSessionCompetencies(sessionId, customCompetencies);
+    }
 
     const result = await generateQuestionsLLM(
       session.resume_text || 'No resume provided',
@@ -38,7 +43,8 @@ router.post('/generate', async (req, res) => {
       session.role,
       session.seniority,
       session.extra_context,
-      selectedCategories || []
+      selectedCategories || [],
+      customCompetencies || []   // <-- new param
     );
 
     const questions = await saveQuestions(sessionId, result.questions);

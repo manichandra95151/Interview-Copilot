@@ -8,8 +8,6 @@ export const MODELS = {
   groq: "groq",
 };
 
-
-
 const gemini = new GoogleGenAI({
   apiKey: process.env.GEMINI_API_KEY,
 });
@@ -43,29 +41,22 @@ export async function callLLM(provider, messages, maxTokens = 1000) {
 
     return text;
   } catch (err) {
-    console.warn(
-      "[LLM] Gemini failed. Falling back to Groq."
-    );
-
+    console.warn("[LLM] Gemini failed. Falling back to Groq.");
     console.error(err.message);
 
     await sleep(1000);
 
-    const completion =
-      await groq.chat.completions.create({
-        model: "llama-3.3-70b-versatile",
-        messages,
-        max_tokens: maxTokens,
-        temperature: 0.3,
-      });
+    const completion = await groq.chat.completions.create({
+      model: "llama-3.3-70b-versatile",
+      messages,
+      max_tokens: maxTokens,
+      temperature: 0.3,
+    });
 
-    const content =
-      completion?.choices?.[0]?.message?.content;
+    const content = completion?.choices?.[0]?.message?.content;
 
     if (!content) {
-      throw new Error(
-        "Groq returned empty response"
-      );
+      throw new Error("Groq returned empty response");
     }
 
     console.log("[LLM] Groq success");
@@ -79,7 +70,7 @@ function cleanJSON(raw) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// QUESTION GENERATION — high quality, category-aware
+// QUESTION GENERATION — high quality, category-aware, custom competency support
 // ─────────────────────────────────────────────────────────────────────────────
 
 const CATEGORY_META = {
@@ -109,17 +100,70 @@ const CATEGORY_META = {
   },
 };
 
-export async function generateQuestionsLLM(resumeText, jd, role, seniority, extraContext, selectedCategories) {
-  // Build per-category instructions
+/**
+ * Build a CATEGORY_META entry from a custom competency object.
+ * Custom competencies come from the frontend as:
+ *   { id: string, name: string, description?: string }
+ * We use the name as the category key (lowercased, spaces→underscores)
+ * so the LLM receives a clear, unique key.
+ */
+function buildCustomCategoryMeta(customCompetencies = []) {
+  const custom = {};
+  for (const comp of customCompetencies) {
+    const key = comp.id || comp.name.toLowerCase().replace(/\s+/g, '_');
+    custom[key] = {
+      label: comp.name,
+      instruction: comp.description
+        ? `Generate a question that assesses this custom competency: "${comp.name}". ${comp.description}`
+        : `Generate a targeted question that assesses the candidate's "${comp.name}" competency specifically relevant to this role and JD.`,
+      isCustom: true,
+    };
+  }
+  return custom;
+}
+
+export async function generateQuestionsLLM(
+  resumeText,
+  jd,
+  role,
+  seniority,
+  extraContext,
+  selectedCategories,
+  customCompetencies = []   // NEW: array of { id, name, description? }
+) {
+  // Merge built-in and custom category metadata
+  const customMeta = buildCustomCategoryMeta(customCompetencies);
+  const allCategoryMeta = { ...CATEGORY_META, ...customMeta };
+
+  // Determine which categories to use.
+  // selectedCategories may include both built-in keys ('behavioral') and
+  // custom keys (comp.id / slugified name). Both are resolved via allCategoryMeta.
   const cats = (selectedCategories && selectedCategories.length > 0)
     ? selectedCategories
     : ['behavioral', 'situational', 'experience', 'technical'];
 
+  // Distribute 10 questions across categories as evenly as possible
+  const baseCount = Math.floor(10 / cats.length);
+  const remainder = 10 - baseCount * cats.length;
+
   const catInstructions = cats.map((c, i) => {
-    const meta = CATEGORY_META[c] || { label: c, instruction: `Generate a question related to ${c}.` };
-    const count = Math.ceil(10 / cats.length);
-    return `Category "${meta.label}": generate ${i === 0 ? Math.max(count, 10 - (cats.length - 1) * Math.floor(10 / cats.length)) : Math.floor(10 / cats.length)} question(s). Rule: ${meta.instruction}`;
+    const meta = allCategoryMeta[c] || {
+      label: c,
+      instruction: `Generate a question related to ${c}.`,
+    };
+    const count = i === 0 ? baseCount + remainder : baseCount;
+    const customTag = meta.isCustom ? ' [CUSTOM COMPETENCY]' : '';
+    return `Category "${meta.label}"${customTag}: generate ${count} question(s). Rule: ${meta.instruction}`;
   }).join('\n');
+
+  // If there are custom competencies, tell the LLM what they are upfront
+  const customCompetencyContext = customCompetencies.length > 0
+    ? `\nCUSTOM COMPETENCIES defined by the interviewer (treat these as first-class categories):\n${
+        customCompetencies.map(c =>
+          `• ${c.name}${c.description ? ': ' + c.description : ''}`
+        ).join('\n')
+      }\n`
+    : '';
 
   const content = await callLLM(
     MODELS.gemini,
@@ -128,13 +172,13 @@ export async function generateQuestionsLLM(resumeText, jd, role, seniority, extr
         role: 'system',
         content: `You are a senior talent acquisition expert and interview coach with 15+ years experience.
 You generate high-quality, incisive interview questions that reveal a candidate's true capabilities.
-
+${customCompetencyContext}
 QUALITY RULES — every question must:
 1. Be specific enough to require a concrete, detailed answer (not a simple yes/no)
 2. Be directly relevant to the role and JD provided
 3. Surface skills or behaviours that predict success in this specific role
 4. Be phrased professionally but conversationally
-5. Have a short, highly concise rubric (max 15 words) listing 2-3 key criteria.
+5. Have a short, highly concise rubric (max 15 words) listing 2-3 key criteria
 6. NOT be generic or clichéd (avoid "Where do you see yourself in 5 years?", "What's your greatest weakness?")
 7. Be calibrated to the seniority level — senior roles demand strategic thinking, junior roles probe fundamentals
 
@@ -155,14 +199,16 @@ Return ONLY valid JSON. Schema:
       "probeHints": ["Follow up: what was the specific outcome?", "Ask: what would you do differently?"]
     }
   ]
-}`,
+}
+
+IMPORTANT: For custom competency categories, use the exact category key provided in the instructions (e.g. if the custom competency is "Negotiation Skills", its category key might be "negotiation_skills"). Always use the slugified lowercase key as the "category" value in JSON.`,
       },
       {
         role: 'user',
         content: `Role: ${role}
 Seniority: ${seniority || 'Mid-level'}
 Additional context from interviewer: ${extraContext || 'None provided'}
-Categories requested: ${cats.join(', ')}
+Categories requested: ${cats.join(', ')}${customCompetencies.length > 0 ? `\nCustom competencies: ${customCompetencies.map(c => c.name).join(', ')}` : ''}
 
 Job Description:
 ${jd}
@@ -280,6 +326,14 @@ Question: ${q.question}
 ${status === 'ANSWERED' ? `Score: ${a.score}/10\nStrength: ${a.strength || 'N/A'}\nGap: ${a.gap || 'None'}\nAnswer: ${a.transcript}` : ''}`;
   }).join('\n\n---\n\n');
 
+  // Build custom competency scoring instructions if any exist on the session
+  const customCompetencies = session.custom_competencies || [];
+  const customCompetencyScoring = customCompetencies.length > 0
+    ? `\nCUSTOM COMPETENCIES to score (1-10, null if insufficient evidence):\n${
+        customCompetencies.map(c => `- ${c.id || c.name.toLowerCase().replace(/\s+/g, '_')}: ${c.name}${c.description ? ' — ' + c.description : ''}`).join('\n')
+      }`
+    : '';
+
   const content = await callLLM(
     MODELS.gemini,
     [
@@ -297,13 +351,14 @@ IMPORTANT RULES:
 6. Competency scores must reflect the actual answers provided — do not guess for unanswered areas
 7. Analysis of skipped/unanswered questions must appear in the report
 
-Competencies to score (1-10, only if enough evidence exists, otherwise null):
+Standard competencies to score (1-10, only if enough evidence exists, otherwise null):
 - communication: clarity, structure, articulation
 - problemSolving: analytical thinking, frameworks used
 - roleKnowledge: domain expertise, technical/functional depth
 - leadership: influence, ownership, collaboration
 - culturalFit: values, motivation, growth mindset
 - adaptability: how they handle ambiguity or change
+${customCompetencyScoring}
 
 Return ONLY valid JSON:
 {
@@ -346,6 +401,7 @@ Total questions: ${session.questions.length}
 Answered: ${answeredQs.length}
 Skipped by manager: ${skippedByManager.length}
 Not answered by candidate: ${notAnswered.length}
+${customCompetencies.length > 0 ? `Custom competencies assessed: ${customCompetencies.map(c => c.name).join(', ')}` : ''}
 
 Interview Q&A:
 ${qaBlock}`,

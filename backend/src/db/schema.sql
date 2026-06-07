@@ -5,18 +5,19 @@
 
 -- Sessions table
 create table if not exists sessions (
-  id             uuid primary key default gen_random_uuid(),
-  user_id        text not null,
-  candidate_name text not null,
-  role           text not null,
-  seniority      text default 'Mid-level',
-  jd_text        text,
-  resume_text    text,
-  extra_context  text,
-  status         text default 'setup',
-  share_token    text unique,
-  created_at     timestamptz default now(),
-  updated_at     timestamptz default now()
+  id                  uuid primary key default gen_random_uuid(),
+  user_id             text not null,
+  candidate_name      text not null,
+  role                text not null,
+  seniority           text default 'Mid-level',
+  jd_text             text,
+  resume_text         text,
+  extra_context       text,
+  custom_competencies text,   -- JSON array: [{id, name, description?}]
+  status              text default 'setup',
+  share_token         text unique,
+  created_at          timestamptz default now(),
+  updated_at          timestamptz default now()
 );
 
 -- Questions table
@@ -60,6 +61,7 @@ create table if not exists reports (
   red_flags     jsonb,
   next_steps    jsonb,
   competencies  jsonb,
+  extra_data    text,   -- JSON blob for additional fields (verdictReason, categoryScores, etc.)
   created_at    timestamptz default now()
 );
 

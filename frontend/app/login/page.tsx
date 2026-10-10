@@ -48,7 +48,7 @@ function LoginForm() {
       footer={
         <>
           Don&apos;t have an account?{" "}
-          <Link href="/signup" className="text-[#6C47FF] font-semibold hover:underline">
+          <Link href="/signup" className="text-[#4F46E5] font-semibold hover:underline">
             Sign up
           </Link>
         </>
@@ -56,9 +56,9 @@ function LoginForm() {
     >
       <GoogleButton next={next} />
       <div className="flex items-center gap-3 my-5">
-        <div className="flex-1 h-px bg-[#E8E4FF]" />
+        <div className="flex-1 h-px bg-[#ECE8DF]" />
         <span className="text-xs text-gray-400 font-medium">or</span>
-        <div className="flex-1 h-px bg-[#E8E4FF]" />
+        <div className="flex-1 h-px bg-[#ECE8DF]" />
       </div>
       <form onSubmit={submit} className="space-y-4">
         <Input

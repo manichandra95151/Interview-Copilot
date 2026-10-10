@@ -3,7 +3,7 @@ import { cn } from "@/lib/cn";
 export function Spinner({ className, size = 20 }: { className?: string; size?: number }) {
   return (
     <svg
-      className={cn("animate-spin text-[#6C47FF]", className)}
+      className={cn("animate-spin text-[#4F46E5]", className)}
       width={size}
       height={size}
       viewBox="0 0 24 24"

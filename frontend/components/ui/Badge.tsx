@@ -3,12 +3,12 @@ import { cn } from "@/lib/cn";
 type Tone = "neutral" | "brand" | "green" | "amber" | "red" | "blue";
 
 const TONES: Record<Tone, string> = {
-  neutral: "bg-gray-100 text-gray-600",
-  brand: "bg-[#EDE9FF] text-[#6C47FF]",
-  green: "bg-green-100 text-green-700",
-  amber: "bg-amber-100 text-amber-700",
-  red: "bg-red-100 text-red-700",
-  blue: "bg-blue-100 text-blue-600",
+  neutral: "bg-[#F5F3EE] text-[#6A665E]",
+  brand: "bg-[#EEF0FF] text-[#4F46E5]",
+  green: "bg-[#E9F7EF] text-green-700",
+  amber: "bg-[#FBF2DF] text-[#92610F]",
+  red: "bg-[#FCECEC] text-red-700",
+  blue: "bg-blue-50 text-blue-600",
 };
 
 export function Badge({
@@ -19,7 +19,7 @@ export function Badge({
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-1 rounded-full",
+        "inline-flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-1 rounded-full tracking-wide",
         TONES[tone],
         className
       )}

@@ -40,4 +40,19 @@ export const api = {
   getReport:     (sessionId: string, token: string) => req<any>(`/api/report/${sessionId}`, {}, token),
   createShare:   (sessionId: string, token: string) => req<any>(`/api/report/${sessionId}/share`, { method: 'POST' }, token),
   getSharedReport: (shareToken: string) => req<any>(`/api/report/shared/${shareToken}`, {}),
+
+  // ── Candidates (RAG) ──
+  getCandidates: (token: string) => req<any[]>('/api/candidates', {}, token),
+
+  uploadCandidates: (form: FormData, token: string) =>
+    fetch(`${BASE}/api/candidates/upload`, {
+      method: 'POST', body: form,
+      headers: { Authorization: `Bearer ${token}` },
+    }).then(async r => { const d = await r.json(); if (!r.ok) throw new Error(d.error); return d; }),
+
+  matchCandidates: (jdText: string, role: string, seniority: string, token: string, topN = 10) =>
+    req<any>('/api/candidates/match', { method: 'POST', body: JSON.stringify({ jdText, role, seniority, topN }) }, token),
+
+  deleteCandidate: (id: string, token: string) =>
+    req<any>(`/api/candidates/${id}`, { method: 'DELETE' }, token),
 };

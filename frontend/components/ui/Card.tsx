@@ -8,7 +8,7 @@ export function Card({
   return (
     <div
       className={cn(
-        "bg-white rounded-2xl border border-[#EDE9FF] p-5",
+        "bg-white rounded-[18px] border border-[#ECE8DF] p-5",
         hover && "card-lift",
         className
       )}

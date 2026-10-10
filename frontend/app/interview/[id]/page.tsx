@@ -11,10 +11,10 @@ type AnswerState = { transcript: string; evaluation: Eval | null; loading: boole
 
 const CAT_STYLE: Record<string, string> = {
   behavioral:  "bg-blue-50 text-blue-700 border-blue-200",
-  situational: "bg-purple-50 text-purple-700 border-purple-200",
+  situational: "bg-indigo-50 text-indigo-700 border-indigo-200",
   experience:  "bg-green-50 text-green-700 border-green-200",
   technical:   "bg-orange-50 text-orange-700 border-orange-200",
-  culture:     "bg-pink-50 text-pink-700 border-pink-200",
+  culture:     "bg-amber-50 text-amber-700 border-amber-200",
   leadership:  "bg-indigo-50 text-indigo-700 border-indigo-200",
   "follow-up": "bg-cyan-50 text-cyan-700 border-cyan-200",
 };
@@ -38,15 +38,15 @@ function ScoreRing({ score, size = 52 }: { score: number | null; size?: number }
 
 function Loader({ title, subtitle }: { title: string; subtitle: string }) {
   return (
-    <div className="min-h-screen bg-[#F8F7FF] flex items-center justify-center">
-      <div className="bg-white rounded-3xl border border-[#EDE9FF] p-8 max-w-sm w-full text-center shadow-xl shadow-purple-50/60 scale-in">
+    <div className="min-h-screen bg-[#FBFAF7] flex items-center justify-center">
+      <div className="bg-white rounded-3xl border border-[#ECE8DF] p-8 max-w-sm w-full text-center shadow-xl shadow-sm scale-in">
         <div className="relative w-14 h-14 mx-auto mb-5">
           <svg className="w-14 h-14" viewBox="0 0 56 56" fill="none">
-            <circle cx="28" cy="28" r="23" stroke="#EDE9FF" strokeWidth="4"/>
+            <circle cx="28" cy="28" r="23" stroke="#EEF0FF" strokeWidth="4"/>
             <circle cx="28" cy="28" r="23" stroke="url(#lg2)" strokeWidth="4"
               strokeDasharray="144" strokeDashoffset="36" strokeLinecap="round"
               transform="rotate(-90 28 28)" className="spin"/>
-            <defs><linearGradient id="lg2" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stopColor="#6C47FF"/><stop offset="100%" stopColor="#EC4899"/></linearGradient></defs>
+            <defs><linearGradient id="lg2" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stopColor="#4F46E5"/><stop offset="100%" stopColor="#E8A33D"/></linearGradient></defs>
           </svg>
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="w-7 h-7 rounded-lg brand-gradient flex items-center justify-center text-white text-xs font-black">C</div>
@@ -190,15 +190,15 @@ export default function InterviewPage() {
 
   if (loading) return <Loader title="Initializing Workspace" subtitle="Calibrating interview parameters..."/>;
   if (finishing) return (
-    <div className="min-h-screen bg-[#F8F7FF] flex items-center justify-center">
-      <div className="bg-white rounded-3xl border border-[#EDE9FF] p-8 max-w-sm w-full text-center shadow-xl shadow-purple-50 scale-in">
+    <div className="min-h-screen bg-[#FBFAF7] flex items-center justify-center">
+      <div className="bg-white rounded-3xl border border-[#ECE8DF] p-8 max-w-sm w-full text-center shadow-xl shadow-sm scale-in">
         <div className="relative w-14 h-14 mx-auto mb-5">
           <svg className="w-14 h-14" viewBox="0 0 56 56" fill="none">
-            <circle cx="28" cy="28" r="23" stroke="#EDE9FF" strokeWidth="4"/>
+            <circle cx="28" cy="28" r="23" stroke="#EEF0FF" strokeWidth="4"/>
             <circle cx="28" cy="28" r="23" stroke="url(#lgf)" strokeWidth="4"
               strokeDasharray="144" strokeDashoffset="36" strokeLinecap="round"
               transform="rotate(-90 28 28)" className="spin"/>
-            <defs><linearGradient id="lgf" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stopColor="#6C47FF"/><stop offset="100%" stopColor="#EC4899"/></linearGradient></defs>
+            <defs><linearGradient id="lgf" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stopColor="#4F46E5"/><stop offset="100%" stopColor="#E8A33D"/></linearGradient></defs>
           </svg>
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="w-7 h-7 rounded-lg brand-gradient flex items-center justify-center text-white text-xs font-black">C</div>
@@ -206,7 +206,7 @@ export default function InterviewPage() {
         </div>
         <h2 className="text-sm font-bold text-gray-900 mb-1">Compiling Assessment Dossier</h2>
         <p className="text-gray-400 text-xs mb-5">Synthesizing evaluation data...</p>
-        <div className="text-left space-y-2.5 border-t border-gray-100 pt-4">
+        <div className="text-left space-y-2.5 border-t border-[#ECE8DF] pt-4">
           {[
             { l:"Aggregating transcripts",          s:"done" },
             { l:"Scoring competency structures",    s:"done" },
@@ -214,7 +214,7 @@ export default function InterviewPage() {
           ].map((item, i) => (
             <div key={i} className="flex items-center gap-3 text-xs">
               {item.s==="done" ? <span className="w-4 h-4 rounded-full bg-green-500 text-white flex items-center justify-center text-[9px] font-black shrink-0">✓</span>
-              : <span className="w-4 h-4 rounded-full border-2 border-[#6C47FF] border-t-transparent spin shrink-0"/>}
+              : <span className="w-4 h-4 rounded-full border-2 border-[#4F46E5] border-t-transparent spin shrink-0"/>}
               <span className={item.s==="active"?"text-gray-900 font-bold":"text-gray-400"}>{item.l}</span>
             </div>
           ))}
@@ -226,10 +226,10 @@ export default function InterviewPage() {
   const isLocked = !!(currentAns?.done || currentAns?.skipped || currentAns?.notAnswered || currentAns?.loading);
 
   return (
-    <div className="min-h-screen bg-[#F8F7FF] flex flex-col">
+    <div className="min-h-screen bg-[#FBFAF7] flex flex-col">
 
       {/* ── TOP BAR ── */}
-      <nav className="bg-white border-b border-[#EDE9FF]/80 sticky top-0 z-30 shadow-sm">
+      <nav className="bg-white border-b border-[#ECE8DF]/80 sticky top-0 z-30 shadow-sm">
         <div className="max-w-[1360px] mx-auto px-4 flex items-center justify-between h-14 gap-4">
           {/* Left: logo + candidate */}
           <div className="flex items-center gap-3 min-w-0">
@@ -240,7 +240,7 @@ export default function InterviewPage() {
             <div className="h-4 w-px bg-gray-200 hidden sm:block"/>
             <div className="hidden sm:flex items-center gap-4 text-[12px] font-medium">
               <Link href="/dashboard" className="text-gray-400 hover:text-gray-900 transition">Dashboard</Link>
-              <span className="text-[#6C47FF] border-b-2 border-[#6C47FF] pb-0.5">Interviews</span>
+              <span className="text-[#4F46E5] border-b-2 border-[#4F46E5] pb-0.5">Interviews</span>
             </div>
           </div>
 
@@ -251,7 +251,7 @@ export default function InterviewPage() {
               <span className="font-mono">{fmt(elapsed)}</span>
             </div>
             <div className="bg-gray-100 rounded-full h-1.5 overflow-hidden">
-              <div className="bg-[#6C47FF] h-1.5 rounded-full transition-all duration-700" style={{ width: `${progress}%` }}/>
+              <div className="bg-[#4F46E5] h-1.5 rounded-full transition-all duration-700" style={{ width: `${progress}%` }}/>
             </div>
           </div>
 
@@ -278,10 +278,10 @@ export default function InterviewPage() {
       <div className="flex-1 flex max-w-[1360px] mx-auto w-full overflow-hidden">
 
         {/* ── LEFT: Evaluation Queue ── */}
-        <div className="w-[240px] xl:w-[260px] shrink-0 border-r border-[#EDE9FF]/80 bg-white flex flex-col hidden lg:flex">
-          <div className="px-4 py-3 border-b border-gray-50 flex items-center justify-between bg-gray-50/50">
+        <div className="w-[240px] xl:w-[260px] shrink-0 border-r border-[#ECE8DF]/80 bg-white flex flex-col hidden lg:flex">
+          <div className="px-4 py-3 border-b border-[#F1EEE6] flex items-center justify-between bg-gray-50/50">
             <span className="text-[10px] font-black text-gray-400 uppercase tracking-wider">Evaluation Queue</span>
-            <span className="text-[9px] font-black text-white bg-[#6C47FF] px-1.5 py-0.5 rounded-full">{questions.length}</span>
+            <span className="text-[9px] font-black text-white bg-[#4F46E5] px-1.5 py-0.5 rounded-full">{questions.length}</span>
           </div>
           <div className="flex-1 overflow-y-auto">
             {questions.map((q, i) => {
@@ -291,7 +291,7 @@ export default function InterviewPage() {
               return (
                 <button key={q.id} onClick={() => setCurrentIdx(i)}
                   className={`w-full text-left p-3.5 flex items-start gap-3 transition-all border-l-[3px] ${
-                    isCurrent ? "bg-[#F8F7FF] border-[#6C47FF]" : "border-transparent hover:bg-gray-50"
+                    isCurrent ? "bg-[#FBFAF7] border-[#4F46E5]" : "border-transparent hover:bg-gray-50"
                   }`}>
                   <div className={`w-6 h-6 rounded-lg text-[10px] font-black flex items-center justify-center shrink-0 mt-0.5 ${
                     ans?.skipped     ? "bg-gray-100 text-gray-400" :
@@ -299,12 +299,12 @@ export default function InterviewPage() {
                     ans?.done && (score||0)>=8 ? "bg-green-50 text-green-700 border border-green-200" :
                     ans?.done && (score||0)>=6 ? "bg-amber-50 text-amber-700 border border-amber-200" :
                     ans?.done   ? "bg-red-50 text-red-600 border border-red-200" :
-                    isCurrent   ? "bg-[#6C47FF] text-white" : "bg-gray-100 text-gray-500"
+                    isCurrent   ? "bg-[#4F46E5] text-white" : "bg-gray-100 text-gray-500"
                   }`}>
                     {ans?.skipped ? "—" : ans?.notAnswered ? "✕" : ans?.done ? (score ?? "✓") : String(i+1).padStart(2,"0")}
                   </div>
                   <div className="min-w-0 flex-1">
-                    {isCurrent && <span className="text-[8px] font-black text-[#6C47FF] bg-[#EDE9FF] px-1.5 py-0.5 rounded uppercase tracking-wide inline-block mb-0.5">Active</span>}
+                    {isCurrent && <span className="text-[8px] font-black text-[#4F46E5] bg-[#EEF0FF] px-1.5 py-0.5 rounded uppercase tracking-wide inline-block mb-0.5">Active</span>}
                     <p className={`text-[11px] line-clamp-2 leading-snug ${isCurrent ? "text-gray-900 font-semibold" : "text-gray-500"}`}>{q.question}</p>
                     <span className="text-[9px] text-gray-400 font-bold uppercase tracking-wide mt-1 block capitalize">{q.category}</span>
                     {isCurrent && <span className="text-[9px] font-mono text-gray-400">{fmt(elapsed)}</span>}
@@ -319,7 +319,7 @@ export default function InterviewPage() {
           </div>
           {/* Candidate footer */}
           {sessionData && (
-            <div className="px-4 py-3 border-t border-gray-100 flex items-center gap-2.5 bg-gray-50/50">
+            <div className="px-4 py-3 border-t border-[#ECE8DF] flex items-center gap-2.5 bg-gray-50/50">
               <div className="w-8 h-8 rounded-full brand-gradient flex items-center justify-center text-white text-xs font-black shrink-0">
                 {sessionData.candidate_name?.charAt(0)}
               </div>
@@ -336,10 +336,10 @@ export default function InterviewPage() {
           {currentQ ? (
             <>
               {/* Active Probe Card */}
-              <div className="bg-white rounded-2xl border border-[#EDE9FF] p-5 shadow-sm fade-in">
+              <div className="bg-white rounded-2xl border border-[#ECE8DF] p-5 shadow-sm fade-in">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <div className="flex items-center gap-1.5 text-[10px] font-black text-[#6C47FF] bg-[#EDE9FF]/60 px-2 py-1 rounded-full uppercase tracking-wider">
+                    <div className="flex items-center gap-1.5 text-[10px] font-black text-[#4F46E5] bg-[#EEF0FF]/60 px-2 py-1 rounded-full uppercase tracking-wider">
                       <svg viewBox="0 0 12 12" fill="none" className="w-3 h-3"><circle cx="6" cy="6" r="5" stroke="currentColor" strokeWidth="1.2"/><path d="M6 4v2.5m0 1v.1" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/></svg>
                       Active Probe
                     </div>
@@ -361,24 +361,24 @@ export default function InterviewPage() {
 
                 <div className="flex flex-wrap items-center gap-2">
                   <button onClick={() => setShowRubric(!showRubric)}
-                    className="flex items-center gap-1.5 text-[11px] font-semibold text-[#6C47FF] bg-[#EDE9FF]/40 border border-[#EDE9FF] hover:bg-[#EDE9FF] rounded-full px-3 py-1 transition">
+                    className="flex items-center gap-1.5 text-[11px] font-semibold text-[#4F46E5] bg-[#EEF0FF]/40 border border-[#ECE8DF] hover:bg-[#EEF0FF] rounded-full px-3 py-1 transition">
                     <svg viewBox="0 0 12 12" fill="none" className="w-3 h-3"><path d="M2 4l4 3 4-3" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/></svg>
                     {showRubric ? "Hide guide" : "Look for: Show guide"}
                   </button>
                 </div>
 
                 {showRubric && (
-                  <div className="mt-4 bg-[#F8F7FF] border border-[#EDE9FF] rounded-xl p-4 fade-in">
-                    <p className="text-[10px] font-bold text-[#6C47FF] uppercase tracking-wider mb-2">Grading Criteria</p>
+                  <div className="mt-4 bg-[#FBFAF7] border border-[#ECE8DF] rounded-xl p-4 fade-in">
+                    <p className="text-[10px] font-bold text-[#4F46E5] uppercase tracking-wider mb-2">Grading Criteria</p>
                     <p className="text-xs text-gray-600 leading-relaxed whitespace-pre-wrap">{currentQ.rubric}</p>
                   </div>
                 )}
               </div>
 
               {/* Candidate Answer + Transcript */}
-              <div className="bg-white rounded-2xl border border-[#EDE9FF] shadow-sm flex flex-col">
+              <div className="bg-white rounded-2xl border border-[#ECE8DF] shadow-sm flex flex-col">
                 {/* Header */}
-                <div className="flex items-center justify-between px-5 py-3.5 border-b border-gray-50">
+                <div className="flex items-center justify-between px-5 py-3.5 border-b border-[#F1EEE6]">
                   <div className="flex items-center gap-2">
                     <span className="text-[11px] font-bold text-gray-600 uppercase tracking-wide">Candidate Answer</span>
                     {recording && (
@@ -393,7 +393,7 @@ export default function InterviewPage() {
                   </div>
                   <button onClick={() => setShowNotes(!showNotes)}
                     className={`flex items-center gap-1.5 text-[11px] font-semibold border px-3 py-1.5 rounded-lg transition ${
-                      showNotes ? "bg-[#EDE9FF] text-[#6C47FF] border-[#6C47FF]/30" : "text-gray-500 border-gray-200 hover:bg-gray-50"
+                      showNotes ? "bg-[#EEF0FF] text-[#4F46E5] border-[#4F46E5]/30" : "text-gray-500 border-gray-200 hover:bg-gray-50"
                     }`}>
                     <svg viewBox="0 0 14 14" fill="none" className="w-3.5 h-3.5"><path d="M2 2h8a1 1 0 011 1v6a1 1 0 01-1 1H5L2 13V3a1 1 0 011-1z" stroke="currentColor" strokeWidth="1.2"/></svg>
                     {showNotes ? "Hide notes" : "Add Notes"}
@@ -419,7 +419,7 @@ export default function InterviewPage() {
                     disabled={isLocked}
                     className={`w-full px-5 py-4 text-sm resize-none focus:outline-none transition-colors leading-relaxed grid-texture ${
                       recording ? "bg-red-50/20 placeholder:text-red-300" :
-                      isLocked ? "bg-[#F8F7FF] text-gray-400 cursor-not-allowed" : "bg-white hover:bg-[#FAFAFE]"
+                      isLocked ? "bg-[#FBFAF7] text-gray-400 cursor-not-allowed" : "bg-white hover:bg-[#FAFAFE]"
                     } ${editTranscript ? "text-gray-900" : "text-gray-400 italic"}`}
                   />
                   {recording && editTranscript && (
@@ -431,7 +431,7 @@ export default function InterviewPage() {
 
                 {/* Notes section */}
                 {showNotes && (
-                  <div className="border-t border-gray-100 px-5 py-3.5 bg-amber-50/30 fade-in">
+                  <div className="border-t border-[#ECE8DF] px-5 py-3.5 bg-amber-50/30 fade-in">
                     <label className="block text-[10px] font-bold text-amber-700 uppercase tracking-wider mb-1.5">
                       🔒 Interviewer Notes — Private
                     </label>
@@ -447,7 +447,7 @@ export default function InterviewPage() {
                 )}
 
                 {/* ── Action Bar ── */}
-                <div className="border-t border-gray-100 px-4 py-3.5 flex flex-wrap items-center gap-2 bg-gray-50/50 rounded-b-2xl">
+                <div className="border-t border-[#ECE8DF] px-4 py-3.5 flex flex-wrap items-center gap-2 bg-gray-50/50 rounded-b-2xl">
                   {/* Timer pill */}
                   <div className="flex items-center gap-2 text-[11px] font-mono text-gray-400 border border-gray-200 bg-white px-3 py-2 rounded-lg shrink-0">
                     {fmt(elapsed)}
@@ -475,7 +475,7 @@ export default function InterviewPage() {
 
                     {editTranscript.trim() && !isLocked && (
                       <button onClick={() => evaluate(false)} disabled={currentAns?.loading}
-                        className="bg-[#6C47FF] hover:bg-[#5A3AE0] text-white text-sm font-bold px-5 py-2 rounded-xl transition active:scale-[0.97] disabled:opacity-50 shadow-md shadow-purple-100">
+                        className="bg-[#4F46E5] hover:bg-[#4338CA] text-white text-sm font-bold px-5 py-2 rounded-xl transition active:scale-[0.97] disabled:opacity-50 shadow-md shadow-sm">
                         {currentAns?.loading ? (
                           <span className="flex items-center gap-2">
                             <span className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full spin"/>
@@ -486,7 +486,7 @@ export default function InterviewPage() {
                     )}
 
                     {currentAns?.done && currentIdx < questions.length - 1 && (
-                      <button onClick={goNext} className="bg-[#6C47FF] text-white text-sm font-bold px-5 py-2 rounded-xl hover:bg-[#5A3AE0] transition">
+                      <button onClick={goNext} className="bg-[#4F46E5] text-white text-sm font-bold px-5 py-2 rounded-xl hover:bg-[#4338CA] transition">
                         Next →
                       </button>
                     )}
@@ -532,10 +532,10 @@ export default function InterviewPage() {
         </div>
 
         {/* ── RIGHT: Calibrated Verdict ── */}
-        <div className="w-[260px] xl:w-[280px] shrink-0 border-l border-[#EDE9FF]/80 bg-white overflow-y-auto hidden lg:flex flex-col">
+        <div className="w-[260px] xl:w-[280px] shrink-0 border-l border-[#ECE8DF]/80 bg-white overflow-y-auto hidden lg:flex flex-col">
 
           {/* Verdict */}
-          <div className="p-4 border-b border-gray-50">
+          <div className="p-4 border-b border-[#F1EEE6]">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
                 <svg viewBox="0 0 16 16" fill="none" className="w-4 h-4 text-gray-400"><path d="M2 12l4-8 4 8M4 9h6" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/></svg>
@@ -564,7 +564,7 @@ export default function InterviewPage() {
                           <span className="font-bold text-gray-700">{m.val}</span>
                         </div>
                         <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                          <div className="h-1.5 bg-[#6C47FF] rounded-full fill-bar" style={{ width: `${m.val * 10}%` }}/>
+                          <div className="h-1.5 bg-[#4F46E5] rounded-full fill-bar" style={{ width: `${m.val * 10}%` }}/>
                         </div>
                       </div>
                     ))}
@@ -574,11 +574,11 @@ export default function InterviewPage() {
             )}
 
             {currentAns?.loading && (
-              <div className="flex items-center gap-2 py-1 text-[#6C47FF]">
+              <div className="flex items-center gap-2 py-1 text-[#4F46E5]">
                 <div className="flex gap-1">
-                  <span className="w-1.5 h-1.5 bg-[#6C47FF] rounded-full bounce-dot-1"/>
-                  <span className="w-1.5 h-1.5 bg-[#6C47FF] rounded-full bounce-dot-2"/>
-                  <span className="w-1.5 h-1.5 bg-[#6C47FF] rounded-full bounce-dot-3"/>
+                  <span className="w-1.5 h-1.5 bg-[#4F46E5] rounded-full bounce-dot-1"/>
+                  <span className="w-1.5 h-1.5 bg-[#4F46E5] rounded-full bounce-dot-2"/>
+                  <span className="w-1.5 h-1.5 bg-[#4F46E5] rounded-full bounce-dot-3"/>
                 </div>
                 <p className="text-[11px] font-bold">AI Evaluating...</p>
               </div>
@@ -591,9 +591,9 @@ export default function InterviewPage() {
 
           {/* Feedback Analysis */}
           {currentAns?.evaluation?.analysis && (
-            <div className="p-4 border-b border-gray-50">
+            <div className="p-4 border-b border-[#F1EEE6]">
               <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2">Feedback Analysis</p>
-              <div className="bg-gray-50 border border-gray-100 rounded-xl p-3 text-[11px] text-gray-600 leading-relaxed">
+              <div className="bg-gray-50 border border-[#ECE8DF] rounded-xl p-3 text-[11px] text-gray-600 leading-relaxed">
                 "{currentAns.evaluation.analysis}"
               </div>
             </div>
@@ -601,7 +601,7 @@ export default function InterviewPage() {
 
           {/* Key Strengths */}
           {currentAns?.evaluation?.strength && (
-            <div className="p-4 border-b border-gray-50">
+            <div className="p-4 border-b border-[#F1EEE6]">
               <p className="text-[9px] font-black text-green-600 uppercase tracking-widest mb-2">Key Strengths</p>
               <div className="space-y-1.5">
                 {currentAns.evaluation.strength.split(/[.;]/).filter(s => s.trim()).slice(0,3).map((s, i) => (
@@ -616,7 +616,7 @@ export default function InterviewPage() {
 
           {/* Performance Gaps */}
           {currentAns?.evaluation?.gap && (
-            <div className="p-4 border-b border-gray-50">
+            <div className="p-4 border-b border-[#F1EEE6]">
               <p className="text-[9px] font-black text-amber-600 uppercase tracking-widest mb-2">Performance Gaps</p>
               <p className="text-[11px] text-amber-700 leading-relaxed">{currentAns.evaluation.gap}</p>
             </div>
@@ -624,20 +624,20 @@ export default function InterviewPage() {
 
           {/* Follow-up Probes */}
           {currentAns?.evaluation?.followUp && (
-            <div className="p-4 border-b border-gray-50">
+            <div className="p-4 border-b border-[#F1EEE6]">
               <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2">Follow-up Probes</p>
               <div className="bg-blue-50 border border-blue-100 rounded-xl p-3 mb-2.5">
                 <p className="text-[11px] text-blue-700 leading-relaxed font-medium">"{currentAns.evaluation.followUp}"</p>
               </div>
               <button onClick={() => addFollowUp(currentAns.evaluation!.followUp!)} disabled={addingQ}
-                className="w-full bg-[#6C47FF] hover:bg-[#5A3AE0] text-white text-[11px] font-bold py-2 rounded-xl transition active:scale-[0.97] disabled:opacity-50">
+                className="w-full bg-[#4F46E5] hover:bg-[#4338CA] text-white text-[11px] font-bold py-2 rounded-xl transition active:scale-[0.97] disabled:opacity-50">
                 {addingQ ? "Adding..." : "Ask this follow-up →"}
               </button>
             </div>
           )}
 
           {currentAns?.skipped && (
-            <div className="p-4 border-b border-gray-50 text-center">
+            <div className="p-4 border-b border-[#F1EEE6] text-center">
               <p className="text-[11px] font-semibold text-gray-400">⏭ Question skipped</p>
             </div>
           )}
@@ -651,11 +651,11 @@ export default function InterviewPage() {
                 const avg = scored.length ? scored.reduce((s,a) => s + (a.evaluation?.score ?? 0), 0) / scored.length : 0;
                 return (
                   <div className="grid grid-cols-2 gap-2 mb-3">
-                    <div className="bg-[#F8F7FF] rounded-xl p-2.5 text-center border border-[#EDE9FF]">
+                    <div className="bg-[#FBFAF7] rounded-xl p-2.5 text-center border border-[#ECE8DF]">
                       <p className="text-[8px] text-gray-400 font-bold uppercase mb-0.5">Avg Score</p>
                       <p className="text-base font-black text-gray-800">{avg > 0 ? avg.toFixed(1) : "—"}</p>
                     </div>
-                    <div className="bg-[#F8F7FF] rounded-xl p-2.5 text-center border border-[#EDE9FF]">
+                    <div className="bg-[#FBFAF7] rounded-xl p-2.5 text-center border border-[#ECE8DF]">
                       <p className="text-[8px] text-gray-400 font-bold uppercase mb-0.5">Accuracy</p>
                       <p className="text-base font-black text-gray-800">{avg > 0 ? Math.round(avg * 10) : "—"}%</p>
                     </div>

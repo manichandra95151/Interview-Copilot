@@ -54,23 +54,26 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F8F7FF]">
+    <div className="min-h-screen bg-[#FBFAF7]">
       {/* Nav */}
-      <nav className="bg-white border-b border-purple-50 sticky top-0 z-20">
+      <nav className="bg-white border-b border-[#ECE8DF] sticky top-0 z-20">
         <div className="max-w-6xl mx-auto px-5 flex items-center justify-between h-16">
           <Link href="/" className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-xl brand-gradient flex items-center justify-center text-white font-bold text-sm">C</div>
             <span className="font-semibold text-gray-900">CopilotHire</span>
           </Link>
           <div className="flex items-center gap-3">
-            <Link href="/setup" className="bg-[#6C47FF] text-white text-sm px-4 py-2 rounded-xl hover:bg-[#5A3AE0] transition font-medium shadow-lg shadow-purple-200">
+            <Link href="/candidates" className="text-sm px-3 py-2 rounded-lg text-gray-500 hover:text-gray-900 hover:bg-gray-50 font-medium">
+              Candidates
+            </Link>
+            <Link href="/setup" className="bg-[#4F46E5] text-white text-sm px-4 py-2 rounded-xl hover:bg-[#4338CA] transition font-medium shadow-lg shadow-sm">
               + New Interview
             </Link>
-            <div className="flex items-center gap-2 pl-2 border-l border-gray-100">
+            <div className="flex items-center gap-2 pl-2 border-l border-[#ECE8DF]">
               {avatarUrl ? (
-                <img src={avatarUrl} alt={displayName} className="w-8 h-8 rounded-full border border-purple-100" />
+                <img src={avatarUrl} alt={displayName} className="w-8 h-8 rounded-full border border-[#ECE8DF]" />
               ) : (
-                <div className="w-8 h-8 rounded-full bg-[#6C47FF] flex items-center justify-center text-white text-xs font-bold">
+                <div className="w-8 h-8 rounded-full bg-[#4F46E5] flex items-center justify-center text-white text-xs font-bold">
                   {(displayName.charAt(0) || "?").toUpperCase()}
                 </div>
               )}
@@ -90,25 +93,28 @@ export default function DashboardPage() {
 
       <div className="max-w-6xl mx-auto px-5 py-8">
         {/* Header */}
-        <div className="flex items-start justify-between mb-8 flex-wrap gap-4">
+        <div className="flex items-start justify-between mb-8 flex-wrap gap-4 fade-up">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Dashboard</h1>
-            <p className="text-gray-500 text-sm mt-1">All your interview sessions in one place</p>
+            <p className="text-[11px] font-semibold text-[#4F46E5] uppercase tracking-[0.14em] mb-2">Workspace</p>
+            <h1 className="text-[32px] font-semibold text-[#1A1A1A] tracking-tight leading-none">Dashboard</h1>
+            <p className="text-[#6A665E] text-sm mt-2">Every interview session, in one calm place.</p>
           </div>
         </div>
 
         {/* Stats */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
           {[
-            { label: "Total", value: stats.total, icon: "🎙️" },
-            { label: "Completed", value: stats.completed, icon: "✅" },
-            { label: "Recommended Hire", value: stats.hires, icon: "⭐" },
-            { label: "Avg Score", value: `${stats.avg}/10`, icon: "📊" },
-          ].map(s => (
-            <div key={s.label} className="bg-white rounded-2xl border border-[#EDE9FF] p-5 card-lift">
-              <div className="text-2xl mb-2">{s.icon}</div>
-              <p className="text-2xl font-bold text-gray-900">{s.value}</p>
-              <p className="text-xs text-gray-400 mt-1">{s.label}</p>
+            { label: "Total sessions", value: stats.total, accent: "#4F46E5" },
+            { label: "Completed", value: stats.completed, accent: "#16a34a" },
+            { label: "Recommended", value: stats.hires, accent: "#E8A33D" },
+            { label: "Avg score", value: `${stats.avg}`, suffix: "/10", accent: "#4F46E5" },
+          ].map((s, i) => (
+            <div key={s.label} className="bg-white rounded-[18px] border border-[#ECE8DF] p-5 card-lift fade-up" style={{ animationDelay: `${i * 60}ms` }}>
+              <span className="block w-6 h-0.5 rounded-full mb-4" style={{ background: s.accent }} />
+              <p className="text-[34px] leading-none text-[#1A1A1A]" style={{ fontFamily: "var(--font-display)", fontWeight: 600 }}>
+                {s.value}<span className="text-base text-[#9C978C] font-normal">{s.suffix || ""}</span>
+              </p>
+              <p className="text-xs text-[#9C978C] mt-2 uppercase tracking-wide">{s.label}</p>
             </div>
           ))}
         </div>
@@ -119,7 +125,7 @@ export default function DashboardPage() {
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder="Search by candidate or role..."
-            className="flex-1 border border-[#EDE9FF] rounded-xl px-4 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#6C47FF] focus:border-transparent transition"
+            className="flex-1 border border-[#ECE8DF] rounded-xl px-4 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#4F46E5] focus:border-transparent transition"
           />
           <div className="flex gap-2 flex-wrap">
             {[
@@ -127,7 +133,7 @@ export default function DashboardPage() {
               ["recommend_hire", "Hire ✓"], ["no_hire", "No hire"],
             ].map(([v, l]) => (
               <button key={v} onClick={() => setFilter(v)}
-                className={`text-xs px-3 py-2 rounded-xl border transition font-medium ${filter === v ? 'bg-[#6C47FF] text-white border-[#6C47FF]' : 'bg-white border-[#EDE9FF] text-gray-600 hover:border-[#6C47FF] hover:text-[#6C47FF]'}`}>
+                className={`text-xs px-3 py-2 rounded-xl border transition font-medium ${filter === v ? 'bg-[#4F46E5] text-white border-[#4F46E5]' : 'bg-white border-[#ECE8DF] text-gray-600 hover:border-[#4F46E5] hover:text-[#4F46E5]'}`}>
                 {l}
               </button>
             ))}
@@ -141,26 +147,26 @@ export default function DashboardPage() {
             <p className="text-sm">Loading sessions...</p>
           </div>
         ) : filtered.length === 0 ? (
-          <div className="bg-white rounded-2xl border border-[#EDE9FF] p-16 text-center">
+          <div className="bg-white rounded-2xl border border-[#ECE8DF] p-16 text-center">
             <div className="text-5xl mb-4">🗂️</div>
             <h3 className="text-lg font-semibold text-gray-900 mb-2">{sessions.length === 0 ? "No interviews yet" : "No matches"}</h3>
             <p className="text-gray-400 text-sm mb-6">{sessions.length === 0 ? "Create your first interview session to get started" : "Try a different search or filter"}</p>
             {sessions.length === 0 && (
-              <Link href="/setup" className="bg-[#6C47FF] text-white px-6 py-3 rounded-xl font-medium text-sm hover:bg-[#5A3AE0] transition">
+              <Link href="/setup" className="bg-[#4F46E5] text-white px-6 py-3 rounded-xl font-medium text-sm hover:bg-[#4338CA] transition">
                 Start your first interview →
               </Link>
             )}
           </div>
         ) : (
-          <div className="bg-white rounded-2xl border border-[#EDE9FF] overflow-hidden">
-            <div className="px-5 py-4 border-b border-gray-50 flex items-center justify-between">
+          <div className="bg-white rounded-2xl border border-[#ECE8DF] overflow-hidden">
+            <div className="px-5 py-4 border-b border-[#F1EEE6] flex items-center justify-between">
               <p className="text-sm font-medium text-gray-500">{filtered.length} session{filtered.length !== 1 ? "s" : ""}</p>
             </div>
-            <div className="divide-y divide-gray-50">
+            <div className="divide-y divide-[#F1EEE6]">
               {filtered.map(s => {
                 const vc = VERDICT_CONFIG[s.verdict || ""];
                 return (
-                  <div key={s.id} className="px-5 py-4 flex flex-col sm:flex-row sm:items-center gap-3 hover:bg-[#F8F7FF] transition group">
+                  <div key={s.id} className="px-5 py-4 flex flex-col sm:flex-row sm:items-center gap-3 hover:bg-[#FBFAF7] transition group">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap mb-1">
                         <p className="font-semibold text-gray-900 truncate">{s.candidate_name}</p>
@@ -173,7 +179,7 @@ export default function DashboardPage() {
                             {vc.label}
                           </span>
                         )}
-                        {s.shareToken && <span className="text-xs text-purple-500 font-medium">🔗 Shared</span>}
+                        {s.shareToken && <span className="text-xs text-indigo-500 font-medium">🔗 Shared</span>}
                       </div>
                       <div className="flex items-center gap-2 text-xs text-gray-400 flex-wrap">
                         <span>{s.role}</span>
@@ -185,7 +191,7 @@ export default function DashboardPage() {
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
                       {s.status === "completed" ? (
-                        <Link href={`/report/${s.id}`} className="text-xs bg-[#6C47FF] text-white px-4 py-2 rounded-xl hover:bg-[#5A3AE0] transition font-medium">
+                        <Link href={`/report/${s.id}`} className="text-xs bg-[#4F46E5] text-white px-4 py-2 rounded-xl hover:bg-[#4338CA] transition font-medium">
                           View Report →
                         </Link>
                       ) : (s.status === "ready" || s.status === "active") ? (

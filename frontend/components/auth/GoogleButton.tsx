@@ -28,7 +28,7 @@ export function GoogleButton({ next }: { next?: string }) {
     <button
       onClick={signInWithGoogle}
       disabled={loading}
-      className="w-full flex items-center justify-center gap-3 bg-white border border-[#E8E4FF] text-gray-700 px-6 py-2.5 rounded-xl text-sm font-semibold hover:bg-gray-50 hover:border-[#D5CCFF] transition-all shadow-sm active:scale-[0.98] disabled:opacity-60"
+      className="w-full flex items-center justify-center gap-3 bg-white border border-[#ECE8DF] text-gray-700 px-6 py-2.5 rounded-xl text-sm font-semibold hover:bg-gray-50 hover:border-[#E0DBCF] transition-all shadow-sm active:scale-[0.98] disabled:opacity-60"
     >
       <svg width="18" height="18" viewBox="0 0 48 48">
         <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z" />

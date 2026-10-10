@@ -93,15 +93,15 @@ export default function ReportPage() {
   };
 
   if (loading) return (
-    <div className="min-h-screen bg-[#F8F7FF] flex items-center justify-center">
-      <div className="bg-white rounded-3xl border border-[#EDE9FF] p-8 max-w-sm w-full text-center shadow-xl shadow-purple-50 scale-in">
+    <div className="min-h-screen bg-[#FBFAF7] flex items-center justify-center">
+      <div className="bg-white rounded-3xl border border-[#ECE8DF] p-8 max-w-sm w-full text-center shadow-xl shadow-sm scale-in">
         <div className="relative w-14 h-14 mx-auto mb-5">
           <svg className="w-14 h-14" viewBox="0 0 56 56" fill="none">
-            <circle cx="28" cy="28" r="23" stroke="#EDE9FF" strokeWidth="4"/>
+            <circle cx="28" cy="28" r="23" stroke="#EEF0FF" strokeWidth="4"/>
             <circle cx="28" cy="28" r="23" stroke="url(#lgr)" strokeWidth="4"
               strokeDasharray="144" strokeDashoffset="36" strokeLinecap="round"
               transform="rotate(-90 28 28)" className="spin"/>
-            <defs><linearGradient id="lgr" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stopColor="#6C47FF"/><stop offset="100%" stopColor="#EC4899"/></linearGradient></defs>
+            <defs><linearGradient id="lgr" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stopColor="#4F46E5"/><stop offset="100%" stopColor="#E8A33D"/></linearGradient></defs>
           </svg>
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="w-7 h-7 rounded-lg brand-gradient flex items-center justify-center text-white text-xs font-black">C</div>
@@ -114,11 +114,11 @@ export default function ReportPage() {
   );
 
   if (error) return (
-    <div className="min-h-screen bg-[#F8F7FF] flex items-center justify-center px-5">
+    <div className="min-h-screen bg-[#FBFAF7] flex items-center justify-center px-5">
       <div className="bg-white rounded-3xl border border-red-200 p-8 max-w-sm text-center shadow-xl">
         <div className="w-12 h-12 rounded-2xl bg-red-50 flex items-center justify-center mx-auto mb-4 text-red-500 text-xl">⚠</div>
         <p className="text-red-500 font-semibold text-sm mb-4">{error}</p>
-        <Link href="/dashboard" className="text-[#6C47FF] text-xs font-bold hover:underline">← Back to dashboard</Link>
+        <Link href="/dashboard" className="text-[#4F46E5] text-xs font-bold hover:underline">← Back to dashboard</Link>
       </div>
     </div>
   );
@@ -127,9 +127,9 @@ export default function ReportPage() {
   const getAnswer = (qId: number) => answers?.find((a: any) => a.question_id == qId);
 
   return (
-    <div className="min-h-screen bg-[#F8F7FF] pb-16">
+    <div className="min-h-screen bg-[#FBFAF7] pb-16">
       {/* Nav */}
-      <nav className="bg-white border-b border-[#EDE9FF]/80 sticky top-0 z-20 shadow-sm print:hidden">
+      <nav className="bg-white border-b border-[#ECE8DF]/80 sticky top-0 z-20 shadow-sm print:hidden">
         <div className="max-w-4xl mx-auto px-5 flex items-center justify-between h-14">
           <Link href="/" className="flex items-center gap-2">
             <div className="w-7 h-7 rounded-lg brand-gradient flex items-center justify-center text-white font-black text-xs">C</div>
@@ -138,7 +138,7 @@ export default function ReportPage() {
           <div className="flex items-center gap-2">
             <button onClick={handleShare}
               className={`flex items-center gap-1.5 text-xs font-bold px-3.5 py-2 rounded-xl transition shadow-sm ${
-                sharedLink ? "bg-green-600 text-white" : "bg-[#6C47FF] text-white hover:bg-[#5A3AE0]"
+                sharedLink ? "bg-green-600 text-white" : "bg-[#4F46E5] text-white hover:bg-[#4338CA]"
               }`}>
               {sharing ? (
                 <span className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full spin"/>
@@ -159,7 +159,7 @@ export default function ReportPage() {
       <div className="max-w-4xl mx-auto px-5 mt-7 space-y-5">
 
         {/* Candidate Header */}
-        <div className="bg-white rounded-2xl border border-[#EDE9FF] p-5 shadow-sm fade-up">
+        <div className="bg-white rounded-2xl border border-[#ECE8DF] p-5 shadow-sm fade-up">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="flex items-center gap-4">
               <div className="w-14 h-14 rounded-2xl brand-gradient flex items-center justify-center text-white font-black text-xl shadow-md shrink-0">
@@ -172,7 +172,7 @@ export default function ReportPage() {
             </div>
             <div className="text-xs text-gray-400 sm:text-right space-y-1">
               <p>{new Date(sessionMeta.createdAt).toLocaleDateString("en-US", { year:"numeric", month:"long", day:"numeric" })}</p>
-              <p className="font-bold text-[#6C47FF]">{sessionMeta.answersCount}/{sessionMeta.questionsCount} Evaluated</p>
+              <p className="font-bold text-[#4F46E5]">{sessionMeta.answersCount}/{sessionMeta.questionsCount} Evaluated</p>
             </div>
           </div>
         </div>
@@ -183,14 +183,14 @@ export default function ReportPage() {
         </div>
 
         {/* Summary */}
-        <div className="bg-white rounded-2xl border border-[#EDE9FF] p-6 shadow-sm fade-up-2">
+        <div className="bg-white rounded-2xl border border-[#ECE8DF] p-6 shadow-sm fade-up-2">
           <h2 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4">Assessment Synthesis</h2>
           <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-line">{report.summary}</p>
         </div>
 
         {/* Competencies */}
         {report.competencies && Object.keys(report.competencies).length > 0 && (
-          <div className="bg-white rounded-2xl border border-[#EDE9FF] p-6 shadow-sm fade-up-3">
+          <div className="bg-white rounded-2xl border border-[#ECE8DF] p-6 shadow-sm fade-up-3">
             <h2 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-5">Target Competency Analysis</h2>
             <div className="space-y-4">
               {Object.entries(report.competencies).map(([key, val]) => (
@@ -202,7 +202,7 @@ export default function ReportPage() {
 
         {/* Strengths + Gaps */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-          <div className="bg-white rounded-2xl border border-[#EDE9FF] p-6 shadow-sm">
+          <div className="bg-white rounded-2xl border border-[#ECE8DF] p-6 shadow-sm">
             <h2 className="text-[10px] font-black text-green-600 uppercase tracking-widest mb-4">✓ Verified Strengths</h2>
             <ul className="space-y-3">
               {(report.strengths || []).map((s: string, i: number) => (
@@ -213,7 +213,7 @@ export default function ReportPage() {
               ))}
             </ul>
           </div>
-          <div className="bg-white rounded-2xl border border-[#EDE9FF] p-6 shadow-sm">
+          <div className="bg-white rounded-2xl border border-[#ECE8DF] p-6 shadow-sm">
             <h2 className="text-[10px] font-black text-amber-600 uppercase tracking-widest mb-4">△ Calibrated Gaps</h2>
             <ul className="space-y-3">
               {(report.gaps || []).map((g: string, i: number) => (
@@ -257,17 +257,17 @@ export default function ReportPage() {
         )}
 
         {/* Q&A Audit Log */}
-        <div className="bg-white rounded-2xl border border-[#EDE9FF] overflow-hidden shadow-sm">
-          <div className="px-6 py-4 border-b border-gray-50 bg-gray-50/60 flex items-center gap-2">
+        <div className="bg-white rounded-2xl border border-[#ECE8DF] overflow-hidden shadow-sm">
+          <div className="px-6 py-4 border-b border-[#F1EEE6] bg-gray-50/60 flex items-center gap-2">
             <svg viewBox="0 0 16 16" fill="none" className="w-4 h-4 text-gray-400"><path d="M2 4h12M2 8h8M2 12h6" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/></svg>
             <h2 className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Q&A Audit Log</h2>
           </div>
-          <div className="divide-y divide-gray-50">
+          <div className="divide-y divide-[#F1EEE6]">
             {(questions || []).map((q: any, i: number) => {
               const ans = getAnswer(q.id);
               const borderColor = !ans || ans.skipped ? "border-gray-200" : (ans.score ?? 0) >= 7 ? "border-green-400" : (ans.score ?? 0) >= 5 ? "border-amber-400" : "border-red-400";
               return (
-                <div key={q.id} className={`p-5 border-l-4 ${borderColor} hover:bg-[#F8F7FF] transition`}>
+                <div key={q.id} className={`p-5 border-l-4 ${borderColor} hover:bg-[#FBFAF7] transition`}>
                   <div className="flex items-center justify-between gap-3 mb-2.5 flex-wrap">
                     <div className="flex items-center gap-2">
                       <span className="text-[10px] font-black text-gray-400 bg-gray-100 px-2 py-0.5 rounded-lg">Q{i+1}</span>
@@ -281,7 +281,7 @@ export default function ReportPage() {
                   </div>
                   <h4 className="text-sm font-bold text-gray-900 mb-3 leading-snug">{q.question}</h4>
                   {ans?.transcript && !ans.skipped && (
-                    <div className="bg-gray-50 rounded-xl p-4 mb-3 border border-gray-100">
+                    <div className="bg-gray-50 rounded-xl p-4 mb-3 border border-[#ECE8DF]">
                       <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1.5">Candidate Transcript</p>
                       <p className="text-xs text-gray-600 leading-relaxed whitespace-pre-line">{ans.transcript}</p>
                     </div>
@@ -311,7 +311,7 @@ export default function ReportPage() {
 
         {/* Bottom actions */}
         <div className="flex flex-col sm:flex-row gap-3 pt-2 print:hidden">
-          <Link href="/setup" className="flex-1 bg-[#6C47FF] hover:bg-[#5A3AE0] text-white text-center py-3.5 rounded-2xl font-bold text-sm shadow-lg shadow-purple-200/50 transition">
+          <Link href="/setup" className="flex-1 bg-[#4F46E5] hover:bg-[#4338CA] text-white text-center py-3.5 rounded-2xl font-bold text-sm shadow-lg shadow-sm transition">
             Create New Assessment →
           </Link>
           <Link href="/dashboard" className="flex-1 bg-white hover:bg-gray-50 text-gray-700 text-center py-3.5 rounded-2xl font-bold text-sm border border-gray-200 transition">

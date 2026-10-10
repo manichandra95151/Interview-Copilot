@@ -2,12 +2,15 @@ import express from 'express';
 import { getSession, saveQuestions, addQuestion, updateSessionCompetencies } from '../services/store.js';
 import { generateQuestionsLLM } from '../services/llm.js';
 import { requireAuth } from '../middleware/auth.js';
+import { userLimiter } from '../middleware/rateLimit.js';
+import { validate } from '../middleware/validate.js';
+import { addQuestionSchema, generateQuestionsSchema } from '../config/schemas.js';
 
 const router = express.Router();
-router.use(requireAuth);
+router.use(requireAuth, userLimiter);
 
 // POST /api/questions/add
-router.post('/add', async (req, res) => {
+router.post('/add', validate(addQuestionSchema), async (req, res) => {
   try {
     const { sessionId, question, category, rubric, timeGuide } = req.body;
     if (!sessionId || !question) return res.status(400).json({ error: 'sessionId and question text required' });
@@ -24,7 +27,7 @@ router.post('/add', async (req, res) => {
 });
 
 // POST /api/questions/generate
-router.post('/generate', async (req, res) => {
+router.post('/generate', validate(generateQuestionsSchema), async (req, res) => {
   try {
     const { sessionId, selectedCategories, customCompetencies } = req.body;
     if (!sessionId) return res.status(400).json({ error: 'sessionId is required' });

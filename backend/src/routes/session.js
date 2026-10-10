@@ -6,6 +6,9 @@ import { v4 as uuidv4 } from 'uuid';
 import { parseResume, truncateResume } from '../services/parser.js';
 import { createSession, getSession, getAllSessions, deleteSession } from '../services/store.js';
 import { requireAuth } from '../middleware/auth.js';
+import { userLimiter } from '../middleware/rateLimit.js';
+import { validate } from '../middleware/validate.js';
+import { createSessionSchema } from '../config/schemas.js';
 
 const router = express.Router();
 
@@ -30,11 +33,11 @@ const upload = multer({
   },
 });
 
-// All session routes require auth
-router.use(requireAuth);
+// All session routes require auth + per-user rate limiting
+router.use(requireAuth, userLimiter);
 
 // POST /api/session/create
-router.post('/create', upload.single('resume'), async (req, res) => {
+router.post('/create', upload.single('resume'), validate(createSessionSchema), async (req, res) => {
   try {
     const { candidateName, role, seniority, jdText, extraContext } = req.body;
 

@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState, useRef, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
+import { useAccessToken } from "@/lib/hooks/useAuth";
 import Link from "next/link";
 import { api } from "@/lib/api";
 
@@ -62,8 +62,7 @@ function Loader({ title, subtitle }: { title: string; subtitle: string }) {
 export default function InterviewPage() {
   const { id: sessionId } = useParams<{ id: string }>();
   const router = useRouter();
-  const { data: session } = useSession();
-  const token = (session as any)?._token;
+  const token = useAccessToken();
 
   const [sessionData, setSessionData] = useState<any>(null);
   const [questions, setQuestions] = useState<Q[]>([]);
@@ -146,7 +145,7 @@ export default function InterviewPage() {
   const stopRec = useCallback(() => { recognitionRef.current?.stop(); setRecording(false); }, []);
 
   const evaluate = async (notAnswered = false) => {
-    if (!currentQ) return;
+    if (!currentQ || !token) return;
     const qId = currentQ.id;
     setAnswers(p => ({ ...p, [qId]: { transcript: editTranscript, evaluation: null, loading: true, done: false, skipped: false, notAnswered, notes } }));
     try {
@@ -161,7 +160,7 @@ export default function InterviewPage() {
   };
 
   const skip = async () => {
-    if (!currentQ) return;
+    if (!currentQ || !token) return;
     await api.skipQuestion(sessionId, currentQ.id, token);
     setAnswers(p => ({ ...p, [currentQ.id]: { transcript: "", evaluation: null, loading: false, done: false, skipped: true } }));
     setEditTranscript(""); setShowRubric(false);
@@ -172,6 +171,7 @@ export default function InterviewPage() {
   const goPrev = () => { if (currentIdx > 0) setCurrentIdx(i => i - 1); };
 
   const finish = async () => {
+    if (!token) return;
     setFinishing(true);
     try { await api.generateReport(sessionId, token); router.push(`/report/${sessionId}`); }
     catch (e: any) { setError(e.message); setFinishing(false); }

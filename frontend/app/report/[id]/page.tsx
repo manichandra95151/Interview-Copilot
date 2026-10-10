@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import { useSession } from "next-auth/react";
+import { useAuth } from "@/lib/hooks/useAuth";
 import Link from "next/link";
 import { api } from "@/lib/api";
 
@@ -61,8 +61,8 @@ function ScoreBadge({ score, skipped }: { score?: number | null; skipped?: boole
 
 export default function ReportPage() {
   const { id: sessionId } = useParams<{ id: string }>();
-  const { data: session, status } = useSession();
-  const token = (session as any)?._token;
+  const { session, loading: authLoading } = useAuth();
+  const token = session?.access_token;
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -70,10 +70,10 @@ export default function ReportPage() {
   const [sharedLink, setSharedLink] = useState("");
 
   useEffect(() => {
-    if (status === "unauthenticated") { setError("Please sign in to view this report."); setLoading(false); return; }
+    if (!authLoading && !token) { setError("Please sign in to view this report."); setLoading(false); return; }
     if (!token) return;
     api.getReport(sessionId, token).then(setData).catch(e => setError(e.message)).finally(() => setLoading(false));
-  }, [sessionId, token, status]);
+  }, [sessionId, token, authLoading]);
 
   const handleShare = async () => {
     if (!token) return; setSharing(true);

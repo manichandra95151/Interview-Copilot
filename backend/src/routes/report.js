@@ -3,6 +3,9 @@ import express from 'express';
 import { getSession, saveReport, getReport, generateShareToken, getSessionByShareToken } from '../services/store.js';
 import { generateReportLLM } from '../services/llm.js';
 import { requireAuth } from '../middleware/auth.js';
+import { userLimiter } from '../middleware/rateLimit.js';
+import { validate } from '../middleware/validate.js';
+import { generateReportSchema } from '../config/schemas.js';
 
 const router = express.Router();
 
@@ -31,10 +34,10 @@ router.get('/shared/:token', async (req, res) => {
 });
 
 // Auth required below
-router.use(requireAuth);
+router.use(requireAuth, userLimiter);
 
 // POST /api/report/generate
-router.post('/generate', async (req, res) => {
+router.post('/generate', validate(generateReportSchema), async (req, res) => {
   try {
     const { sessionId } = req.body;
     if (!sessionId) return res.status(400).json({ error: 'sessionId required' });

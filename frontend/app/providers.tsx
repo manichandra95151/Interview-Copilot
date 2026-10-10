@@ -1,6 +1,12 @@
 "use client";
-import { SessionProvider } from "next-auth/react";
+
+import { AuthProvider } from "@/lib/hooks/useAuth";
+import { ToastProvider } from "@/lib/hooks/useToast";
 
 export function Providers({ children }: { children: React.ReactNode }) {
-  return <SessionProvider>{children}</SessionProvider>;
+  return (
+    <AuthProvider>
+      <ToastProvider>{children}</ToastProvider>
+    </AuthProvider>
+  );
 }

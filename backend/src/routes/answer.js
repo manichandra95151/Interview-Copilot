@@ -2,12 +2,15 @@ import express from 'express';
 import { getSession, saveAnswer } from '../services/store.js';
 import { evaluateAnswerLLM } from '../services/llm.js';
 import { requireAuth } from '../middleware/auth.js';
+import { userLimiter } from '../middleware/rateLimit.js';
+import { validate } from '../middleware/validate.js';
+import { evaluateAnswerSchema, skipAnswerSchema } from '../config/schemas.js';
 
 const router = express.Router();
-router.use(requireAuth);
+router.use(requireAuth, userLimiter);
 
 // POST /api/answers/evaluate
-router.post('/evaluate', async (req, res) => {
+router.post('/evaluate', validate(evaluateAnswerSchema), async (req, res) => {
   try {
     const { sessionId, questionId, transcript, manualNotes, notAnswered } = req.body;
     if (!sessionId || !questionId) return res.status(400).json({ error: 'sessionId and questionId required' });
@@ -38,7 +41,7 @@ router.post('/evaluate', async (req, res) => {
 });
 
 // POST /api/answers/skip
-router.post('/skip', async (req, res) => {
+router.post('/skip', validate(skipAnswerSchema), async (req, res) => {
   try {
     const { sessionId, questionId } = req.body;
     const session = await getSession(sessionId);

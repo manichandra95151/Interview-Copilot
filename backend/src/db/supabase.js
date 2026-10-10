@@ -1,13 +1,12 @@
 import { createClient } from '@supabase/supabase-js';
 import WebSocket from 'ws';
-
-const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+import { env } from '../config/env.js';
 
 export const supabase = createClient(
-  supabaseUrl,
-  supabaseKey,
+  env.SUPABASE_URL,
+  env.SUPABASE_SERVICE_ROLE_KEY,
   {
+    auth: { persistSession: false, autoRefreshToken: false },
     global: {
       WebSocket,
     },

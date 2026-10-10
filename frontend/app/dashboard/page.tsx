@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
-import { useSession, signOut } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/lib/hooks/useAuth";
 import Link from "next/link";
 import { api } from "@/lib/api";
 
@@ -16,8 +17,17 @@ const STATUS_CONFIG: Record<string, string> = {
 };
 
 export default function DashboardPage() {
-  const { data: session } = useSession();
-  const token = (session as any)?._token;
+  const router = useRouter();
+  const { user, session, signOut } = useAuth();
+  const token = session?.access_token;
+  const displayName =
+    (user?.user_metadata?.full_name as string) || user?.email || "";
+  const avatarUrl = user?.user_metadata?.avatar_url as string | undefined;
+  const handleSignOut = async () => {
+    await signOut();
+    router.push("/login");
+    router.refresh();
+  };
   const [sessions, setSessions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -57,18 +67,18 @@ export default function DashboardPage() {
               + New Interview
             </Link>
             <div className="flex items-center gap-2 pl-2 border-l border-gray-100">
-              {(session as any)?.user?.image ? (
-                <img src={(session as any).user.image} alt={(session as any).user?.name || ""} className="w-8 h-8 rounded-full border border-purple-100" />
+              {avatarUrl ? (
+                <img src={avatarUrl} alt={displayName} className="w-8 h-8 rounded-full border border-purple-100" />
               ) : (
                 <div className="w-8 h-8 rounded-full bg-[#6C47FF] flex items-center justify-center text-white text-xs font-bold">
-                  {((session as any)?.user?.name?.charAt(0) || (session as any)?.user?.email?.charAt(0) || "?").toUpperCase()}
+                  {(displayName.charAt(0) || "?").toUpperCase()}
                 </div>
               )}
               <span className="text-xs text-gray-500 hidden sm:block max-w-[120px] truncate">
-                {(session as any)?.user?.name || (session as any)?.user?.email || ""}
+                {displayName}
               </span>
               <button
-                onClick={() => signOut({ callbackUrl: "/login" })}
+                onClick={handleSignOut}
                 className="text-xs text-gray-400 hover:text-red-500 transition font-medium px-2 py-1 rounded-lg hover:bg-red-50"
               >
                 Sign out
@@ -189,7 +199,7 @@ export default function DashboardPage() {
                       )}
                       <button
                         onClick={async () => {
-                          if (!confirm("Delete this session?")) return;
+                          if (!token || !confirm("Delete this session?")) return;
                           await api.deleteSession(s.id, token);
                           setSessions(prev => prev.filter(x => x.id !== s.id));
                         }}

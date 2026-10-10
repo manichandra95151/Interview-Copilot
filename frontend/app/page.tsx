@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { useSession } from "next-auth/react";
+import { useAuth } from "@/lib/hooks/useAuth";
 
 const features = [
   {
@@ -67,7 +67,7 @@ const steps = [
 ];
 
 export default function HomePage() {
-  const { data: session } = useSession();
+  const { user } = useAuth();
 
   return (
     <div className="min-h-screen bg-[#F8F7FF] selection:bg-[#6C47FF]/20 selection:text-[#6C47FF]">
@@ -84,14 +84,14 @@ export default function HomePage() {
             <a href="#how-it-works" className="hover:text-gray-900 transition-colors">About</a>
           </div>
           <div className="flex items-center gap-3">
-            {session ? (
+            {user ? (
               <Link href="/dashboard" className="bg-[#6C47FF] text-white text-sm font-semibold px-4 py-2 rounded-xl hover:bg-[#5A3AE0] transition shadow-lg shadow-purple-200/50">
                 Dashboard →
               </Link>
             ) : (
               <>
-                <Link href="/api/auth/signin" className="text-sm font-semibold text-gray-500 hover:text-gray-900 transition">Sign in</Link>
-                <Link href="/api/auth/signin" className="bg-[#6C47FF] text-white text-sm font-semibold px-4 py-2 rounded-xl hover:bg-[#5A3AE0] transition shadow-lg shadow-purple-200/50">
+                <Link href="/login" className="text-sm font-semibold text-gray-500 hover:text-gray-900 transition">Sign in</Link>
+                <Link href="/signup" className="bg-[#6C47FF] text-white text-sm font-semibold px-4 py-2 rounded-xl hover:bg-[#5A3AE0] transition shadow-lg shadow-purple-200/50">
                   Start Free
                 </Link>
               </>
@@ -126,7 +126,7 @@ export default function HomePage() {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-3 justify-center items-center fade-up-3">
-            <Link href={session ? "/setup" : "/api/auth/signin"}
+            <Link href={user ? "/setup" : "/signup"}
               className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-[#6C47FF] text-white px-7 py-3.5 rounded-2xl text-[15px] font-bold hover:bg-[#5A3AE0] active:scale-[0.98] transition-all duration-200 shadow-xl shadow-purple-200/60">
               Start Free Session →
             </Link>
@@ -306,7 +306,7 @@ export default function HomePage() {
           <p className="text-purple-200 text-sm mb-8 leading-relaxed max-w-lg mx-auto">
             No signups required. Keep using your current sessions, and your dashboard will automatically unlock the pilot matching module soon.
           </p>
-          <Link href={session ? "/setup" : "/api/auth/signin"}
+          <Link href={user ? "/setup" : "/signup"}
             className="inline-flex items-center gap-2 bg-white text-[#6C47FF] px-8 py-3.5 rounded-2xl text-[15px] font-black hover:bg-purple-50 active:scale-[0.98] transition-all shadow-lg">
             Get Started Free →
           </Link>

@@ -1,18 +1,16 @@
-import { withAuth } from "next-auth/middleware";
-import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
+import { type NextRequest } from "next/server";
+import { updateSession } from "@/lib/supabase/middleware";
 
-export default function middleware(req: any, event: any) {
-  const isAuthEnabled = process.env.isAuth === 'true' || process.env.IS_AUTH === 'true';
-  if (!isAuthEnabled) {
-    return NextResponse.next();
-  }
-  return withAuth({
-    pages: { signIn: "/" }, // redirect to HOME not /login
-  })(req, event);
+export async function middleware(request: NextRequest) {
+  return updateSession(request);
 }
 
 export const config = {
-  // protect app pages but NOT report/shared (public) or home
-  matcher: ["/dashboard/:path*", "/setup/:path*", "/interview/:path*", "/report/:path*"],
+  matcher: [
+    /*
+     * Match all request paths except static assets and auth callback so the
+     * session cookie is refreshed and protected routes are guarded.
+     */
+    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+  ],
 };

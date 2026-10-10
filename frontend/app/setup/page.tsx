@@ -1,7 +1,7 @@
 "use client";
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
+import { useAccessToken } from "@/lib/hooks/useAuth";
 import Link from "next/link";
 import { api } from "@/lib/api";
 
@@ -66,8 +66,7 @@ function Loader({ title, subtitle, steps }: { title: string; subtitle: string; s
 
 export default function SetupPage() {
   const router = useRouter();
-  const { data: session } = useSession();
-  const token = (session as any)?._token;
+  const token = useAccessToken();
   const fileRef = useRef<HTMLInputElement>(null);
 
   const [name, setName] = useState("");

@@ -13,10 +13,17 @@ const schema = z.object({
   SUPABASE_URL: z.string().url(),
   SUPABASE_SERVICE_ROLE_KEY: z.string().min(1),
 
-  // AI / integrations (optional during Phase 1; required in later phases)
+  // AI / integrations (optional at boot; required by the features that use them)
   ANTHROPIC_API_KEY: z.string().optional(),
   DEEPGRAM_API_KEY: z.string().optional(),
   VOYAGE_API_KEY: z.string().optional(),
+  VOYAGE_MODEL: z.string().default('voyage-3'),
+
+  // Gmail API (interview invites) — OAuth2 refresh-token flow
+  GMAIL_CLIENT_ID: z.string().optional(),
+  GMAIL_CLIENT_SECRET: z.string().optional(),
+  GMAIL_REFRESH_TOKEN: z.string().optional(),
+  GMAIL_SENDER: z.string().optional(), // e.g. "CopilotHire <you@gmail.com>"
 });
 
 const parsed = schema.safeParse(process.env);

@@ -5,10 +5,11 @@ import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 
-import sessionRoutes  from './routes/session.js';
-import questionRoutes from './routes/question.js';
-import answerRoutes   from './routes/answer.js';
-import reportRoutes   from './routes/report.js';
+import sessionRoutes   from './routes/session.js';
+import questionRoutes  from './routes/question.js';
+import answerRoutes    from './routes/answer.js';
+import reportRoutes    from './routes/report.js';
+import candidateRoutes from './routes/candidates.js';
 
 import { globalLimiter } from './middleware/rateLimit.js';
 import { notFound, errorHandler } from './middleware/error.js';
@@ -24,10 +25,11 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 app.get('/api/health', (_, res) => res.json({ status: 'ok', ts: Date.now() }));
 
-app.use('/api/session',   sessionRoutes);
-app.use('/api/questions', questionRoutes);
-app.use('/api/answers',   answerRoutes);
-app.use('/api/report',    reportRoutes);
+app.use('/api/session',    sessionRoutes);
+app.use('/api/questions',  questionRoutes);
+app.use('/api/answers',    answerRoutes);
+app.use('/api/report',     reportRoutes);
+app.use('/api/candidates', candidateRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

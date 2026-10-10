@@ -48,3 +48,10 @@ export const skipAnswerSchema = z.object({
 export const generateReportSchema = z.object({
   sessionId: z.string().uuid(),
 });
+
+export const matchCandidatesSchema = z.object({
+  jdText: z.string().min(20).max(50000),
+  role: z.string().max(120).optional(),
+  seniority: z.string().max(60).optional(),
+  topN: z.coerce.number().int().min(1).max(25).optional(),
+});

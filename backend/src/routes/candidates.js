@@ -8,7 +8,8 @@ import {
   listCandidates,
   deleteCandidate,
 } from '../services/candidates.js';
-import { embedAndStoreResume, matchCandidatesToJD } from '../services/rag.js';
+import { embedAndStoreResume } from '../services/rag.js';
+import { matchCandidatesHybrid } from '../services/matching.js';
 import { requireAuth } from '../middleware/auth.js';
 import { userLimiter } from '../middleware/rateLimit.js';
 import { validate } from '../middleware/validate.js';
@@ -86,18 +87,18 @@ router.get('/', async (req, res, next) => {
   }
 });
 
-// POST /api/candidates/match — rank the pool against a JD
+// POST /api/candidates/match — hybrid rank of the pool against a JD
 router.post('/match', validate(matchCandidatesSchema), async (req, res, next) => {
   try {
-    const { jdText, role, seniority, topN } = req.body;
-    const results = await matchCandidatesToJD({
+    const { jdText, role, seniority, weights } = req.body;
+    const data = await matchCandidatesHybrid({
       userId: req.userId,
       jdText,
       role,
       seniority,
-      topN: topN || 10,
+      weights,
     });
-    res.json({ results });
+    res.json(data);
   } catch (err) {
     next(err);
   }

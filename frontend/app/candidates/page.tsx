@@ -26,6 +26,10 @@ export default function CandidatesPage() {
   const [seniority, setSeniority] = useState("Mid-level");
   const [matching, setMatching] = useState(false);
   const [matches, setMatches] = useState<Match[] | null>(null);
+  const [meta, setMeta] = useState<{ evaluated: number; total: number } | null>(null);
+  const [showWeights, setShowWeights] = useState(false);
+  const [weights, setWeights] = useState({ skills: 35, experience: 25, responsibilities: 25, education: 15 });
+  const weightTotal = weights.skills + weights.experience + weights.responsibilities + weights.education;
 
   const load = () => {
     if (!token) return;
@@ -46,10 +50,12 @@ export default function CandidatesPage() {
     }
     setMatching(true);
     setMatches(null);
+    setMeta(null);
     try {
-      const res = await api.matchCandidates(jdText, role, seniority, token);
+      const res = await api.matchCandidates(jdText, role, seniority, token, weights);
       setMatches(res.results);
-      if (!res.results.length) toast("No matches found", "info");
+      setMeta({ evaluated: res.evaluated, total: res.total });
+      if (!res.results.length) toast("No candidates to evaluate", "info");
     } catch (e: any) {
       toast(e.message || "Matching failed", "error");
     } finally {
@@ -167,24 +173,60 @@ export default function CandidatesPage() {
                 placeholder="Paste the job description and key requirements…"
                 className="w-full px-3.5 py-2.5 rounded-xl border border-[#ECE8DF] bg-white text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#4F46E5]/30 focus:border-[#4F46E5] resize-none"
               />
-              <div className="flex justify-end mt-3">
+              {/* Weights editor */}
+              <button
+                onClick={() => setShowWeights((v) => !v)}
+                className="mt-4 text-xs font-medium text-[#4F46E5] hover:underline"
+              >
+                {showWeights ? "Hide scoring weights" : "Adjust scoring weights"}
+              </button>
+              {showWeights && (
+                <div className="mt-3 p-4 rounded-xl bg-[#FBFAF7] border border-[#ECE8DF] space-y-3 fade-in">
+                  <p className="text-[11px] text-[#9C978C]">
+                    How much each criterion counts toward the fit score. Mandatory requirements are flagged separately.
+                  </p>
+                  {(["skills", "experience", "responsibilities", "education"] as const).map((k) => (
+                    <div key={k} className="flex items-center gap-3">
+                      <span className="text-xs font-medium text-[#6A665E] capitalize w-28">{k}</span>
+                      <input
+                        type="range" min={0} max={60} value={weights[k]}
+                        onChange={(e) => setWeights((w) => ({ ...w, [k]: Number(e.target.value) }))}
+                        className="flex-1 accent-[#4F46E5]"
+                      />
+                      <span className="text-xs font-bold text-[#1A1A1A] w-8 text-right tabular-nums">{weights[k]}</span>
+                    </div>
+                  ))}
+                  <p className={`text-[11px] ${weightTotal === 100 ? "text-[#9C978C]" : "text-[#92610F]"}`}>
+                    Total: {weightTotal}{weightTotal !== 100 ? " (normalized automatically)" : ""}
+                  </p>
+                </div>
+              )}
+
+              <div className="flex justify-end mt-4">
                 <Button onClick={runMatch} loading={matching}>
-                  {matching ? "Ranking candidates…" : "Rank candidates →"}
+                  {matching ? "Evaluating candidates…" : "Rank candidates →"}
                 </Button>
               </div>
             </Card>
 
             {matching && (
-              <div className="flex items-center justify-center gap-3 py-10 text-gray-400 text-sm">
-                <Spinner /> Embedding the role and ranking with Claude…
+              <div className="flex flex-col items-center justify-center gap-3 py-12 text-[#9C978C] text-sm">
+                <Spinner size={24} />
+                <span>Parsing the role and evaluating every candidate…</span>
+                <span className="text-xs text-[#C9C2B2]">Requirement-by-requirement with evidence — this takes a moment.</span>
               </div>
             )}
 
-            {matches && matches.length > 0 && (
+            {!matching && matches && (
               <div className="space-y-4">
-                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
-                  {matches.length} ranked candidate{matches.length > 1 ? "s" : ""}
-                </p>
+                <div className="flex items-center justify-between">
+                  <p className="text-xs font-semibold text-[#9C978C] uppercase tracking-wider">
+                    {matches.length} candidate{matches.length !== 1 ? "s" : ""} ranked
+                  </p>
+                  {meta && meta.total > meta.evaluated && (
+                    <p className="text-[11px] text-[#C9C2B2]">Evaluated {meta.evaluated} of {meta.total}</p>
+                  )}
+                </div>
                 {matches.map((m, i) => (
                   <MatchCard key={m.candidateId} match={m} rank={i + 1} />
                 ))}

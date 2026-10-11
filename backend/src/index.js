@@ -1,15 +1,20 @@
 import 'dotenv/config';
 import { env } from './config/env.js';
+import http from 'http';
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
+
+import { attachInterviewWS } from './ws/interview.js';
 
 import sessionRoutes   from './routes/session.js';
 import questionRoutes  from './routes/question.js';
 import answerRoutes    from './routes/answer.js';
 import reportRoutes    from './routes/report.js';
 import candidateRoutes from './routes/candidates.js';
+import scheduleRoutes  from './routes/schedule.js';
+import livekitRoutes   from './routes/livekit.js';
 
 import { globalLimiter } from './middleware/rateLimit.js';
 import { notFound, errorHandler } from './middleware/error.js';
@@ -30,8 +35,16 @@ app.use('/api/questions',  questionRoutes);
 app.use('/api/answers',    answerRoutes);
 app.use('/api/report',     reportRoutes);
 app.use('/api/candidates', candidateRoutes);
+app.use('/api/schedule',   scheduleRoutes);
+app.use('/api/livekit',    livekitRoutes);
 
 app.use(notFound);
 app.use(errorHandler);
 
-app.listen(env.PORT, () => console.log(`\n🚀 CopilotHire API → http://localhost:${env.PORT}\n`));
+const server = http.createServer(app);
+attachInterviewWS(server); // ws at /ws/interview
+
+server.listen(env.PORT, () => {
+  console.log(`\n🚀 CopilotHire API → http://localhost:${env.PORT}`);
+  console.log(`🎙️  Interview WS  → ws://localhost:${env.PORT}/ws/interview\n`);
+});

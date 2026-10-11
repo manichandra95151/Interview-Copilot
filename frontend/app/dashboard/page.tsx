@@ -12,8 +12,9 @@ const VERDICT_CONFIG: Record<string, { label: string; cls: string; dot: string }
 };
 
 const STATUS_CONFIG: Record<string, string> = {
-  setup: "bg-gray-100 text-gray-500", ready: "bg-blue-100 text-blue-600",
-  active: "bg-orange-100 text-orange-600", completed: "bg-green-100 text-green-700",
+  draft: "bg-gray-100 text-gray-500", setup: "bg-gray-100 text-gray-500",
+  ready: "bg-blue-50 text-blue-600", scheduled: "bg-[#EEF0FF] text-[#4F46E5]",
+  active: "bg-[#FBF2DF] text-[#92610F]", completed: "bg-[#E9F7EF] text-green-700",
 };
 
 export default function DashboardPage() {
@@ -190,16 +191,21 @@ export default function DashboardPage() {
                       </div>
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
+                      {s.status !== "completed" && (
+                        <Link href={`/schedule/${s.id}`} className="text-xs text-[#6A665E] px-3 py-2 rounded-xl border border-[#ECE8DF] hover:border-[#E0DBCF] hover:text-[#1A1A1A] transition font-medium">
+                          Schedule
+                        </Link>
+                      )}
                       {s.status === "completed" ? (
                         <Link href={`/report/${s.id}`} className="text-xs bg-[#4F46E5] text-white px-4 py-2 rounded-xl hover:bg-[#4338CA] transition font-medium">
                           View Report →
                         </Link>
-                      ) : (s.status === "ready" || s.status === "active") ? (
-                        <Link href={`/interview/${s.id}`} className="text-xs bg-orange-500 text-white px-4 py-2 rounded-xl hover:bg-orange-600 transition font-medium">
-                          Continue →
+                      ) : (s.status === "ready" || s.status === "active" || s.status === "scheduled") ? (
+                        <Link href={`/interview/${s.id}`} className="text-xs bg-[#E8A33D] text-white px-4 py-2 rounded-xl hover:bg-[#C9821B] transition font-medium">
+                          Open room →
                         </Link>
                       ) : (
-                        <Link href="/setup" className="text-xs text-gray-500 px-4 py-2 rounded-xl border border-gray-200 hover:bg-gray-50 transition">
+                        <Link href="/setup" className="text-xs text-gray-500 px-4 py-2 rounded-xl border border-[#ECE8DF] hover:bg-gray-50 transition">
                           Setup
                         </Link>
                       )}

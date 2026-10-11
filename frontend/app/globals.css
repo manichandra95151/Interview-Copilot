@@ -212,6 +212,22 @@ h1, h2, h3 {
 /* ─── Divider dot ─── */
 .dot-sep::before { content: '·'; margin: 0 .5rem; color: var(--ink-faint); }
 
+/* ─── LiveKit video — tint to editorial palette ─── */
+[data-lk-theme="default"] {
+  --lk-accent-bg: #4F46E5;
+  --lk-accent-fg: #ffffff;
+  --lk-accent2: #4338CA;
+  --lk-danger: #dc2626;
+  --lk-bg: #141418;
+  --lk-bg2: #1c1c22;
+  --lk-control-bg: rgba(255,255,255,0.08);
+  --lk-control-hover-bg: rgba(255,255,255,0.16);
+  --lk-control-active-bg: #4F46E5;
+  --lk-control-active-hover-bg: #4338CA;
+  --lk-border-color: rgba(255,255,255,0.1);
+  --lk-border-radius: 12px;
+}
+
 /* ─── Reduced motion ─── */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {

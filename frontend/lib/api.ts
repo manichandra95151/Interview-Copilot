@@ -50,9 +50,30 @@ export const api = {
       headers: { Authorization: `Bearer ${token}` },
     }).then(async r => { const d = await r.json(); if (!r.ok) throw new Error(d.error); return d; }),
 
-  matchCandidates: (jdText: string, role: string, seniority: string, token: string, topN = 10) =>
-    req<any>('/api/candidates/match', { method: 'POST', body: JSON.stringify({ jdText, role, seniority, topN }) }, token),
+  matchCandidates: (
+    jdText: string, role: string, seniority: string, token: string,
+    weights?: { skills: number; experience: number; responsibilities: number; education: number }
+  ) =>
+    req<any>('/api/candidates/match', { method: 'POST', body: JSON.stringify({ jdText, role, seniority, weights }) }, token),
 
   deleteCandidate: (id: string, token: string) =>
     req<any>(`/api/candidates/${id}`, { method: 'DELETE' }, token),
+
+  // ── Scheduling & join ──
+  scheduleInterview: (
+    payload: { sessionId: string; scheduledAt?: string; candidateEmail?: string; requireCode?: boolean; sendEmail?: boolean },
+    token: string
+  ) => req<any>('/api/schedule', { method: 'POST', body: JSON.stringify(payload) }, token),
+
+  getJoinInfo: (joinToken: string) => req<any>(`/api/schedule/join/${joinToken}`, {}),
+
+  verifyJoinCode: (joinToken: string, code: string) =>
+    req<any>(`/api/schedule/join/${joinToken}/verify`, { method: 'POST', body: JSON.stringify({ code }) }),
+
+  // ── LiveKit video tokens ──
+  getLivekitToken: (sessionId: string, token: string) =>
+    req<{ token: string; url: string }>('/api/livekit/token', { method: 'POST', body: JSON.stringify({ sessionId }) }, token),
+
+  getLivekitJoinToken: (joinToken: string) =>
+    req<{ token: string; url: string }>('/api/livekit/join-token', { method: 'POST', body: JSON.stringify({ joinToken }) }),
 };

@@ -1,68 +1,59 @@
-import { GoogleGenAI } from "@google/genai";
-import Groq from "groq-sdk";
+import Anthropic from "@anthropic-ai/sdk";
+import { env } from "../config/env.js";
 
-const OPENROUTER_BASE = 'https://openrouter.ai/api/v1';
-
+// Logical "providers" kept for call-site compatibility; they map to Claude models.
+// gemini-tier → stronger reasoning (questions, reports); groq-tier → fast (eval).
 export const MODELS = {
   gemini: "gemini",
   groq: "groq",
 };
 
-const gemini = new GoogleGenAI({
-  apiKey: process.env.GEMINI_API_KEY,
-});
+const MODEL_MAP = {
+  gemini: "claude-sonnet-4-6",
+  groq: "claude-haiku-4-5",
+};
 
-const groq = new Groq({
-  apiKey: process.env.GROQ_API_KEY,
-});
-
-const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
-
-export async function callLLM(provider, messages, maxTokens = 1000) {
-  try {
-    console.log("[LLM] Trying Gemini 2.5 Flash");
-
-    const prompt = messages
-      .map((m) => `${m.role.toUpperCase()}:\n${m.content}`)
-      .join("\n\n");
-
-    const result = await gemini.models.generateContent({
-      model: "gemini-2.5-flash",
-      contents: prompt,
+let _client = null;
+function client() {
+  if (!env.ANTHROPIC_API_KEY) {
+    throw Object.assign(new Error("AI features are not configured (missing ANTHROPIC_API_KEY)"), {
+      status: 503,
     });
-
-    const text = result.text;
-
-    if (!text) {
-      throw new Error("Gemini returned empty response");
-    }
-
-    console.log("[LLM] Gemini success");
-
-    return text;
-  } catch (err) {
-    console.warn("[LLM] Gemini failed. Falling back to Groq.");
-    console.error(err.message);
-
-    await sleep(1000);
-
-    const completion = await groq.chat.completions.create({
-      model: "llama-3.3-70b-versatile",
-      messages,
-      max_tokens: maxTokens,
-      temperature: 0.3,
-    });
-
-    const content = completion?.choices?.[0]?.message?.content;
-
-    if (!content) {
-      throw new Error("Groq returned empty response");
-    }
-
-    console.log("[LLM] Groq success");
-
-    return content;
   }
+  if (!_client) _client = new Anthropic({ apiKey: env.ANTHROPIC_API_KEY });
+  return _client;
+}
+
+/**
+ * Unified Claude call. Accepts the legacy [{role:'system'|'user', content}]
+ * message shape; the system turns are hoisted into Claude's cached system prompt
+ * so repeated calls (e.g. per-answer evaluation) reuse the prefix.
+ */
+export async function callLLM(provider, messages, maxTokens = 1000) {
+  const model = MODEL_MAP[provider] || MODEL_MAP.gemini;
+
+  const systemText = messages
+    .filter((m) => m.role === "system")
+    .map((m) => m.content)
+    .join("\n\n");
+
+  const turns = messages
+    .filter((m) => m.role !== "system")
+    .map((m) => ({ role: m.role === "assistant" ? "assistant" : "user", content: m.content }));
+
+  const res = await client().messages.create({
+    model,
+    max_tokens: maxTokens,
+    ...(systemText
+      ? { system: [{ type: "text", text: systemText, cache_control: { type: "ephemeral" } }] }
+      : {}),
+    messages: turns.length ? turns : [{ role: "user", content: "Proceed." }],
+  });
+
+  const block = res.content.find((b) => b.type === "text");
+  const text = block ? block.text : "";
+  if (!text) throw new Error("Claude returned an empty response");
+  return text;
 }
 
 function cleanJSON(raw) {

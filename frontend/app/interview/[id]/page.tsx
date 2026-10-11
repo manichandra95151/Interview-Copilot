@@ -2,6 +2,8 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useAccessToken } from "@/lib/hooks/useAuth";
+import { useInterviewAudio } from "@/lib/hooks/useInterviewAudio";
+import { VideoStage } from "@/components/interview/VideoStage";
 import Link from "next/link";
 import { api } from "@/lib/api";
 
@@ -70,7 +72,6 @@ export default function InterviewPage() {
   const [answers, setAnswers] = useState<Record<number, AnswerState>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [recording, setRecording] = useState(false);
   const [editTranscript, setEditTranscript] = useState("");
   const [notes, setNotes] = useState("");
   const [showNotes, setShowNotes] = useState(false);
@@ -78,9 +79,14 @@ export default function InterviewPage() {
   const [elapsed, setElapsed] = useState(0);
   const [showRubric, setShowRubric] = useState(false);
   const [addingQ, setAddingQ] = useState(false);
-  const recognitionRef = useRef<any>(null);
   const timerRef = useRef<any>(null);
   const transcriptRef = useRef<HTMLTextAreaElement>(null);
+  const answerBaseRef = useRef(0);
+  const [autoFill, setAutoFill] = useState(true);
+
+  const audio = useInterviewAudio({ sessionId, role: "interviewer", token });
+  const live = audio.candidateConnected;
+  const [lk, setLk] = useState<{ token: string; url: string } | null>(null);
 
   const currentQ = questions[currentIdx];
   const currentAns = currentQ ? answers[currentQ.id] : null;
@@ -117,32 +123,39 @@ export default function InterviewPage() {
     return () => clearInterval(timerRef.current);
   }, []);
 
+  // Fetch a LiveKit token for the in-app video call (best-effort; falls back to audio-only).
+  useEffect(() => {
+    if (!token) return;
+    api.getLivekitToken(sessionId, token).then(setLk).catch(() => {});
+  }, [sessionId, token]);
+
   useEffect(() => {
     if (currentQ) {
+      // Start capturing this question's answer from the candidate's live speech.
+      answerBaseRef.current = audio.candidateText.length;
+      setAutoFill(true);
+      audio.setPlanned(currentQ.question);
       const ans = answers[currentQ.id];
       setEditTranscript(ans?.transcript || "");
       setNotes(ans?.notes || "");
       setShowRubric(false);
       setShowNotes(false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentQ?.id]);
 
-  const startRec = useCallback(() => {
-    const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    if (!SR) { alert("Voice recording requires Chrome or Edge browser."); return; }
-    const rec = new SR();
-    rec.continuous = true; rec.interimResults = true; rec.lang = "en-US";
-    rec.onresult = (e: any) => {
-      let t = ""; for (let i = 0; i < e.results.length; i++) t += e.results[i][0].transcript;
-      setEditTranscript(t);
-    };
-    rec.onerror = () => setRecording(false);
-    rec.onend = () => setRecording(false);
-    rec.start(); recognitionRef.current = rec;
-    setEditTranscript(""); setRecording(true);
-  }, []);
+  const toggleMic = useCallback(() => {
+    audio.micOn ? audio.stopMic() : audio.startMic();
+  }, [audio]);
 
-  const stopRec = useCallback(() => { recognitionRef.current?.stop(); setRecording(false); }, []);
+  // Auto-fill the answer field from the candidate's turns for the active question.
+  useEffect(() => {
+    if (!autoFill) return;
+    const base = answerBaseRef.current;
+    const answered = audio.candidateText.slice(base);
+    const iv = audio.interim.candidate ? (answered ? " " : "") + audio.interim.candidate : "";
+    setEditTranscript((answered + iv).trim());
+  }, [audio.candidateText, audio.interim.candidate, autoFill]);
 
   const evaluate = async (notAnswered = false) => {
     if (!currentQ || !token) return;
@@ -333,6 +346,13 @@ export default function InterviewPage() {
 
         {/* ── CENTER ── */}
         <div className="flex-1 flex flex-col p-4 xl:p-5 gap-4 overflow-y-auto min-w-0">
+          {/* In-app video call */}
+          {lk && (
+            <div className="h-[280px] bg-[#111] rounded-2xl overflow-hidden border border-[#ECE8DF] shrink-0">
+              <VideoStage url={lk.url} token={lk.token} compact onLocalMicTrack={(t) => audio.startMic(t)} />
+            </div>
+          )}
+
           {currentQ ? (
             <>
               {/* Active Probe Card */}
@@ -381,14 +401,16 @@ export default function InterviewPage() {
                 <div className="flex items-center justify-between px-5 py-3.5 border-b border-[#F1EEE6]">
                   <div className="flex items-center gap-2">
                     <span className="text-[11px] font-bold text-gray-600 uppercase tracking-wide">Candidate Answer</span>
-                    {recording && (
+                    {live ? (
                       <span className="flex items-center gap-1.5 text-[10px] font-black text-red-500">
                         <span className="relative flex w-2 h-2">
                           <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400/60"/>
                           <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"/>
                         </span>
-                        LIVE
+                        CANDIDATE LIVE
                       </span>
+                    ) : (
+                      <span className="text-[10px] font-semibold text-[#9C978C]">Waiting for candidate to join…</span>
                     )}
                   </div>
                   <button onClick={() => setShowNotes(!showNotes)}
@@ -400,9 +422,31 @@ export default function InterviewPage() {
                   </button>
                 </div>
 
-                {/* Transcript textarea */}
+                {/* Live conversation feed (labeled) */}
+                {(audio.turns.length > 0 || audio.interim.candidate || audio.interim.interviewer) && (
+                  <div className="border-b border-[#F1EEE6] max-h-44 overflow-y-auto px-5 py-3 space-y-1.5 bg-[#FBFAF7]">
+                    <p className="text-[9px] font-bold text-[#9C978C] uppercase tracking-wider mb-1">Live conversation</p>
+                    {audio.turns.slice(-8).map((t, i) => (
+                      <p key={i} className={`text-xs leading-relaxed ${t.role === "candidate" ? "text-[#1A1A1A]" : "text-[#6A665E]"}`}>
+                        <span className={`font-semibold ${t.role === "candidate" ? "text-[#4F46E5]" : "text-[#9C978C]"}`}>
+                          {t.role === "candidate" ? "Candidate" : "You"}:{" "}
+                        </span>
+                        {t.text}
+                      </p>
+                    ))}
+                    {(audio.interim.candidate || audio.interim.interviewer) && (
+                      <p className="text-xs italic text-[#9C978C]">
+                        <span className="font-semibold">{audio.interim.candidate ? "Candidate" : "You"}: </span>
+                        {audio.interim.candidate || audio.interim.interviewer}
+                        <span className="caret-blink">|</span>
+                      </p>
+                    )}
+                  </div>
+                )}
+
+                {/* Transcript textarea (editable answer to evaluate) */}
                 <div className="relative">
-                  {recording && (
+                  {live && (
                     <div className="absolute top-3 right-3 z-10 flex items-center gap-1.5 bg-red-500 text-white px-2.5 py-1 rounded-full shadow-sm text-[10px] font-black">
                       <span className="w-1.5 h-1.5 bg-white rounded-full rec-pulse"/>
                       Listening · {fmt(elapsed)}
@@ -411,23 +455,79 @@ export default function InterviewPage() {
                   <textarea
                     ref={transcriptRef}
                     value={editTranscript}
-                    onChange={e => setEditTranscript(e.target.value)}
+                    onChange={e => { setEditTranscript(e.target.value); setAutoFill(false); }}
                     rows={6}
-                    placeholder={recording
-                      ? "Transcribing live audio..."
-                      : "Paste or type the candidate's response here, or click Record Answer to transcribe live..."}
+                    placeholder={live
+                      ? "Candidate's answer transcribes here live…"
+                      : "The candidate's answer appears here once they join — or type/paste it manually."}
                     disabled={isLocked}
                     className={`w-full px-5 py-4 text-sm resize-none focus:outline-none transition-colors leading-relaxed grid-texture ${
-                      recording ? "bg-red-50/20 placeholder:text-red-300" :
+                      live ? "bg-red-50/20 placeholder:text-red-300" :
                       isLocked ? "bg-[#FBFAF7] text-gray-400 cursor-not-allowed" : "bg-white hover:bg-[#FAFAFE]"
                     } ${editTranscript ? "text-gray-900" : "text-gray-400 italic"}`}
                   />
-                  {recording && editTranscript && (
+                  {live && editTranscript && (
                     <p className="absolute bottom-3 right-4 text-[10px] text-gray-400 italic">
                       Candidate is speaking...<span className="caret-blink">|</span>
                     </p>
                   )}
                 </div>
+
+                {/* ── Live AI copilot ── */}
+                {(live || audio.insight) && (
+                  <div className="border-t border-[#ECE8DF] px-5 py-4 bg-[#FBFAF7] fade-in">
+                    <div className="flex items-center gap-2 mb-3">
+                      <span className="w-1.5 h-1.5 bg-[#4F46E5] rounded-full rec-pulse" />
+                      <span className="text-[10px] font-bold text-[#4F46E5] uppercase tracking-[0.12em]">Live AI copilot</span>
+                      {live && (
+                        <button onClick={audio.requestInsight}
+                          className="ml-auto text-[10px] font-semibold text-[#6A665E] hover:text-[#4F46E5] border border-[#ECE8DF] hover:border-[#4F46E5] px-2.5 py-1 rounded-lg transition">
+                          Analyze now
+                        </button>
+                      )}
+                    </div>
+
+                    {audio.insight ? (
+                      <div className="flex items-start gap-4">
+                        <div className="shrink-0 text-center">
+                          <ScoreRing score={audio.insight.score} size={48} />
+                          <p className="text-[9px] text-[#9C978C] uppercase tracking-wide mt-0.5">Live</p>
+                        </div>
+                        <div className="flex-1 min-w-0 space-y-1.5">
+                          {audio.insight.activeQuestion && (
+                            <p className="text-[11px] text-[#6A665E]">
+                              <span className="text-[#9C978C]">Answering{audio.insight.questionSource === "interviewer_adhoc" ? " (your ad-hoc question)" : ""}:</span>{" "}
+                              <span className="font-medium text-[#1A1A1A]">{audio.insight.activeQuestion}</span>
+                            </p>
+                          )}
+                          {audio.insight.strength && (
+                            <p className="text-xs text-green-700 flex gap-1.5"><span>✓</span><span>{audio.insight.strength}</span></p>
+                          )}
+                          {audio.insight.gap && (
+                            <p className="text-xs text-[#92610F] flex gap-1.5"><span>!</span><span>{audio.insight.gap}</span></p>
+                          )}
+                          {audio.insight.followUp && (
+                            <div className="flex items-start gap-2 bg-white border border-[#ECE8DF] rounded-lg px-3 py-2 mt-1">
+                              <span className="text-[#4F46E5] text-xs mt-0.5">↳</span>
+                              <p className="text-xs text-gray-700 flex-1">{audio.insight.followUp}</p>
+                              <button onClick={() => addFollowUp(audio.insight!.followUp)} disabled={addingQ}
+                                className="text-[10px] font-semibold text-[#4F46E5] hover:underline shrink-0 disabled:opacity-40">
+                                Ask this
+                              </button>
+                            </div>
+                          )}
+                          {audio.insight.sentiment && (
+                            <span className="inline-block text-[10px] font-medium text-[#6A665E] bg-white border border-[#ECE8DF] px-2 py-0.5 rounded-full capitalize mt-1">
+                              {audio.insight.sentiment}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    ) : (
+                      <p className="text-xs text-[#9C978C] italic">Listening — insights appear as the candidate speaks.</p>
+                    )}
+                  </div>
+                )}
 
                 {/* Notes section */}
                 {showNotes && (
@@ -466,7 +566,7 @@ export default function InterviewPage() {
 
                   {/* Right-side actions */}
                   <div className="ml-auto flex items-center gap-2 flex-wrap justify-end">
-                    {!editTranscript.trim() && !isLocked && !recording && (
+                    {!editTranscript.trim() && !isLocked && !live && (
                       <button onClick={() => evaluate(true)}
                         className="text-amber-600 text-[11px] font-bold px-3.5 py-2 border border-amber-200 rounded-xl hover:bg-amber-50 transition">
                         Mark Unanswered
@@ -491,27 +591,32 @@ export default function InterviewPage() {
                       </button>
                     )}
 
-                    <button onClick={recording ? stopRec : startRec} disabled={isLocked}
-                      className={`flex items-center gap-2 text-sm font-bold px-4 py-2 rounded-xl transition active:scale-[0.97] disabled:opacity-30 ${
-                        recording
-                          ? "bg-white text-red-500 border border-red-200 hover:bg-red-50"
-                          : "bg-gray-950 text-white hover:bg-gray-800 shadow-sm"
-                      }`}>
-                      {recording ? (
-                        <>
-                          <span className="w-2.5 h-2.5 rounded bg-red-500 shrink-0"/>
-                          Stop
-                        </>
-                      ) : (
-                        <>
-                          <svg viewBox="0 0 16 16" fill="none" className="w-4 h-4 shrink-0"><circle cx="8" cy="8" r="3" fill="white"/><circle cx="8" cy="8" r="6" stroke="white" strokeWidth="1.2"/></svg>
-                          Record Answer →
-                        </>
-                      )}
-                    </button>
+                    {/* Manual mic — only when video isn't handling it */}
+                    {!lk && (
+                      <button onClick={toggleMic}
+                        title="Your microphone — so the AI hears the questions you ask"
+                        className={`flex items-center gap-2 text-sm font-bold px-4 py-2 rounded-xl transition active:scale-[0.97] ${
+                          audio.micOn
+                            ? "bg-white text-red-500 border border-red-200 hover:bg-red-50"
+                            : "bg-gray-950 text-white hover:bg-gray-800 shadow-sm"
+                        }`}>
+                        {audio.micOn ? (
+                          <>
+                            <span className="w-2.5 h-2.5 rounded bg-red-500 shrink-0"/>
+                            Mute my mic
+                          </>
+                        ) : (
+                          <>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-4 h-4 shrink-0"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0014 0M12 18v3" strokeLinecap="round"/></svg>
+                            Turn on my mic
+                          </>
+                        )}
+                      </button>
+                    )}
                   </div>
 
                   {error && <p className="w-full text-red-500 text-[11px] font-semibold mt-1">⚠ {error}</p>}
+                  {audio.error && <p className="w-full text-amber-600 text-[11px] font-semibold mt-1">⚠ {audio.error}</p>}
                 </div>
               </div>
 

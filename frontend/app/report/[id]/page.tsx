@@ -148,8 +148,10 @@ export default function ReportPage() {
               {sharing ? "Sharing..." : sharedLink ? "Link Copied" : "Share Dossier"}
             </button>
             <button onClick={() => window.print()}
-              className="text-xs text-gray-600 border border-gray-200 bg-white px-3.5 py-2 rounded-xl hover:bg-gray-50 transition font-bold">
-              Print
+              title="Opens your browser's print dialog — choose 'Save as PDF'"
+              className="flex items-center gap-1.5 text-xs text-gray-600 border border-gray-200 bg-white px-3.5 py-2 rounded-xl hover:bg-gray-50 transition font-bold">
+              <svg viewBox="0 0 16 16" fill="none" className="w-3.5 h-3.5"><path d="M4 6V2h8v4M4 12H3a1 1 0 01-1-1V8a1 1 0 011-1h10a1 1 0 011 1v3a1 1 0 01-1 1h-1M4 10h8v4H4v-4z" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/></svg>
+              Download PDF
             </button>
             <Link href="/dashboard" className="text-xs font-bold text-gray-400 hover:text-gray-900 transition hidden sm:block ml-1">Dashboard</Link>
           </div>

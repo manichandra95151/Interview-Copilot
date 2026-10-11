@@ -54,6 +54,49 @@ export async function generateShareToken(sessionId) {
 }
 
 /**
+ * Schedule a session: set time + candidate email, and mint a single join
+ * token (+ optional 6-digit code). Idempotent — reuses an existing token.
+ */
+export async function scheduleSession(sessionId, { scheduledAt, candidateEmail, requireCode }) {
+  const current = await supabase
+    .from('sessions')
+    .select('join_token, join_code')
+    .eq('id', sessionId)
+    .single();
+
+  const joinToken = current.data?.join_token || crypto.randomBytes(20).toString('hex');
+  let joinCode = current.data?.join_code || null;
+  if (requireCode && !joinCode) {
+    joinCode = String(Math.floor(100000 + Math.random() * 900000)); // 6 digits
+  }
+
+  const { error } = await supabase
+    .from('sessions')
+    .update({
+      scheduled_at: scheduledAt || null,
+      candidate_email: candidateEmail || null,
+      join_token: joinToken,
+      join_code: joinCode,
+      status: 'scheduled',
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', sessionId);
+  if (error) throw new Error('DB scheduleSession: ' + error.message);
+  return { joinToken, joinCode };
+}
+
+/** Public lookup for the candidate join page (no auth). */
+export async function getSessionByJoinToken(token) {
+  const { data: row, error } = await supabase
+    .from('sessions')
+    .select('id, candidate_name, role, seniority, scheduled_at, join_code, status')
+    .eq('join_token', token)
+    .single();
+  if (error || !row) throw Object.assign(new Error('Invalid or expired link'), { status: 404 });
+  return row;
+}
+
+/**
  * Save or update custom competencies on a session.
  * Called from question.js /generate when customCompetencies are provided.
  * @param {string} sessionId
